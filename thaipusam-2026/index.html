@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thaipusam 2026 E-Guide | Indian.SG</title>
+  <meta name="description" content="Thaipusam 2026 quick guide: MRT exits, temple access, key routes — all in one place." />
+
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#0f1733;
+      --text:#e9eeff;
+      --muted:#b7c3ff;
+      --border:rgba(255,255,255,.12);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 15% 10%, rgba(124,92,255,.25), transparent 60%),
+        radial-gradient(900px 500px at 90% 20%, rgba(0,190,255,.18), transparent 55%),
+        radial-gradient(900px 500px at 40% 100%, rgba(255,160,90,.12), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      line-height:1.45;
+    }
+    a{color:inherit}
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+      padding:28px 18px 60px;
+    }
+    header{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      padding:18px 18px 16px;
+      box-shadow: var(--shadow);
+    }
+    .kicker{
+      font-size:13px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--muted);
+      margin:0 0 10px;
+    }
+    h1{
+      margin:0 0 10px;
+      font-size: clamp(22px, 3.2vw, 34px);
+    }
+    .lead{
+      margin:0;
+      color: rgba(233,238,255,.88);
+      font-size: 15.5px;
+    }
+    .cta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:14px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      font-size:14px;
+      color: rgba(233,238,255,.92);
+    }
+    .pill small{color:var(--muted); font-size:12px}
+
+    .toolbar{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      margin:18px 2px 12px;
+      flex-wrap:wrap;
+    }
+    .count{color:rgba(233,238,255,.82); font-size:14px}
+    .search{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      background: rgba(255,255,255,.04);
+      min-width:min(420px, 100%);
+    }
+    .search input{
+      width:100%;
+      border:0;
+      outline:0;
+      background:transparent;
+      color:var(--text);
+      font-size:14px;
+    }
+    .search input::placeholder{color: rgba(183,195,255,.75)}
+
+    .grid{
+      display:grid;
+      gap:12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top:8px;
+    }
+    @media (min-width: 640px){
+      .grid{grid-template-columns: repeat(3, minmax(0, 1fr));}
+    }
+    @media (min-width: 980px){
+      .grid{grid-template-columns: repeat(4, minmax(0, 1fr));}
+    }
+
+    figure{
+      margin:0;
+      border-radius: 14px;
+      overflow:hidden;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      box-shadow: 0 8px 20px rgba(0,0,0,.25);
+      cursor: zoom-in;
+      position:relative;
+    }
+    figure img{
+      width:100%;
+      height: 210px;
+      object-fit: cover;
+      display:block;
+      transform: scale(1.01);
+      transition: transform .2s ease;
+    }
+    figure:hover img{transform: scale(1.05)}
+    figcaption{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 10px 11px;
+      font-size:13px;
+      color: rgba(233,238,255,.86);
+      background: rgba(10,16,33,.6);
+      border-top:1px solid var(--border);
+    }
+    figcaption span:last-child{color: rgba(183,195,255,.9)}
+
+    footer{
+      margin-top:18px;
+      color: rgba(233,238,255,.7);
+      font-size:13px;
+      text-align:center;
+    }
+
+    /* Lightbox */
+    .lightbox{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.75);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:9999;
+    }
+    .lightbox[open]{display:flex;}
+    .lb-card{
+      width:min(980px, 100%);
+      background: rgba(15,23,51,.92);
+      border:1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .lb-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+    }
+    .lb-top .title{
+      font-size:14px;
+      color: rgba(233,238,255,.88);
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .lb-actions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .btn{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding:8px 10px;
+      border-radius: 999px;
+      cursor:pointer;
+      font-size:13px;
+    }
+    .btn:hover{background: rgba(255,255,255,.10)}
+    .lb-img{
+      width:100%;
+      height:min(76vh, 820px);
+      background:#0b1020;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .lb-img img{
+      max-width:100%;
+      max-height:100%;
+      display:block;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <p class="kicker">Indian.SG • Quick Guide</p>
+      <h1>📲✨ 𝐓𝐡𝐚𝐢𝐩𝐮𝐬𝐚𝐦 𝟐𝟎𝟐𝟔 𝐄-𝐆𝐮𝐢𝐝𝐞 𝐢𝐬 𝐡𝐞𝐫𝐞!</h1>
+      <p class="lead">
+        MRT exits, Temple access, key routes — all in one quick guide.<br/>
+        Save it, share it and walk in prepared.
+      </p>
+
+      <div class="cta">
+        <div class="pill">✅ <span>Best viewed on mobile</span></div>
+        <div class="pill">🗺️ <span>Swipe + tap to zoom</span></div>
+        <div class="pill">🔗 <span><small>Hosted on</small>&nbsp;GitHub Pages</span></div>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <div class="count" id="count">Loading…</div>
+      <div class="search" role="search" aria-label="Search images">
+        🔎
+        <input id="q" type="search" placeholder="Search by filename (e.g., 1982)" autocomplete="off" />
+      </div>
+    </div>
+
+    <main class="grid" id="grid" aria-label="Thaipusam 2026 E-Guide images"></main>
+
+    <footer>
+      © <span id="year"></span> Indian.SG • Please share this guide with family & friends.
+    </footer>
+  </div>
+
+  <!-- Lightbox -->
+  <dialog class="lightbox" id="lightbox" aria-label="Image viewer">
+    <div class="lb-card">
+      <div class="lb-top">
+        <div class="title" id="lbTitle"></div>
+        <div class="lb-actions">
+          <button class="btn" id="prevBtn" type="button">← Prev</button>
+          <button class="btn" id="nextBtn" type="button">Next →</button>
+          <button class="btn" id="closeBtn" type="button">✕ Close</button>
+        </div>
+      </div>
+      <div class="lb-img">
+        <img id="lbImg" alt="" />
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    // 1) Put your images in the SAME folder as this index.html
+    // 2) If your filenames differ, edit the list below.
+
+    // Generates: IMG_1977.jpeg ... IMG_1986.jpeg
+    const images = Array.from({ length: 10 }, (_, i) => {
+      const n = 1977 + i;
+      return { src: `IMG_${n}.jpeg`, name: `IMG_${n}.jpeg` };
+    });
+
+    const grid = document.getElementById("grid");
+    const count = document.getElementById("count");
+    const q = document.getElementById("q");
+    const year = document.getElementById("year");
+    year.textContent = new Date().getFullYear();
+
+    // Lightbox
+    const lightbox = document.getElementById("lightbox");
+    const lbImg = document.getElementById("lbImg");
+    const lbTitle = document.getElementById("lbTitle");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const closeBtn = document.getElementById("closeBtn");
+    let currentIndex = 0;
+    let currentList = images;
+
+    function openLightbox(index) {
+      currentIndex = index;
+      const item = currentList[currentIndex];
+      lbImg.src = item.src;
+      lbImg.alt = item.name;
+      lbTitle.textContent = item.name;
+      lightbox.setAttribute("open", "");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeLightbox() {
+      lightbox.removeAttribute("open");
+      document.body.style.overflow = "";
+    }
+
+    function step(dir) {
+      if (!currentList.length) return;
+      currentIndex = (currentIndex + dir + currentList.length) % currentList.length;
+      openLightbox(currentIndex);
+    }
+
+    function render(list) {
+      currentList = list;
+      grid.innerHTML = "";
+      count.textContent = `${list.length} image${list.length === 1 ? "" : "s"}`;
+
+      list.forEach((img, idx) => {
+        const fig = document.createElement("figure");
+        fig.tabIndex = 0;
+        fig.setAttribute("role", "button");
+        fig.setAttribute("aria-label", `Open ${img.name}`);
+
+        const image = document.createElement("img");
+        image.loading = "lazy";
+        image.src = img.src;
+        image.alt = img.name;
+
+        const cap = document.createElement("figcaption");
+        cap.innerHTML = `<span>Tap to view</span><span>${img.name}</span>`;
+
+        fig.appendChild(image);
+        fig.appendChild(cap);
+
+        fig.addEventListener("click", () => openLightbox(idx));
+        fig.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") openLightbox(idx);
+        });
+
+        grid.appendChild(fig);
+      });
+    }
+
+    // Search/filter
+    q.addEventListener("input", () => {
+      const term = q.value.trim().toLowerCase();
+      const filtered = images.filter(x => x.name.toLowerCase().includes(term));
+      render(filtered);
+    });
+
+    // Lightbox controls
+    prevBtn.addEventListener("click", () => step(-1));
+    nextBtn.addEventListener("click", () => step(1));
+    closeBtn.addEventListener("click", closeLightbox);
+
+    // Close if backdrop clicked
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) closeLightbox();
+    });
+
+    // Keyboard navigation
+    window.addEventListener("keydown", (e) => {
+      if (!lightbox.hasAttribute("open")) return;
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowLeft") step(-1);
+      if (e.key === "ArrowRight") step(1);
+    });
+
+    render(images);
+  </script>
+</body>
+</html>
