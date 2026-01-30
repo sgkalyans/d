@@ -4,377 +4,225 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Thaipusam 2026 E-Guide | Indian.SG</title>
-  <meta name="description" content="Thaipusam 2026 quick guide: MRT exits, temple access, key routes — all in one place." />
+  <meta name="description" content="Thaipusam 2026 E-Guide: MRT exits, temple access and key routes in one quick guide." />
 
+  <!-- TailwindCSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Optional: nicer system font rendering -->
   <style>
-    :root{
-      --bg:#0b1020;
-      --card:#0f1733;
-      --text:#e9eeff;
-      --muted:#b7c3ff;
-      --border:rgba(255,255,255,.12);
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --radius:16px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background:
-        radial-gradient(1200px 600px at 15% 10%, rgba(124,92,255,.25), transparent 60%),
-        radial-gradient(900px 500px at 90% 20%, rgba(0,190,255,.18), transparent 55%),
-        radial-gradient(900px 500px at 40% 100%, rgba(255,160,90,.12), transparent 55%),
-        var(--bg);
-      color:var(--text);
-      line-height:1.45;
-    }
-    a{color:inherit}
-    .wrap{
-      max-width:1100px;
-      margin:0 auto;
-      padding:28px 18px 60px;
-    }
-    header{
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      border:1px solid var(--border);
-      border-radius: var(--radius);
-      padding:18px 18px 16px;
-      box-shadow: var(--shadow);
-    }
-    .kicker{
-      font-size:13px;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      color:var(--muted);
-      margin:0 0 10px;
-    }
-    h1{
-      margin:0 0 10px;
-      font-size: clamp(22px, 3.2vw, 34px);
-    }
-    .lead{
-      margin:0;
-      color: rgba(233,238,255,.88);
-      font-size: 15.5px;
-    }
-    .cta{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:14px;
-    }
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:9px 12px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.04);
-      font-size:14px;
-      color: rgba(233,238,255,.92);
-    }
-    .pill small{color:var(--muted); font-size:12px}
-
-    .toolbar{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:space-between;
-      margin:18px 2px 12px;
-      flex-wrap:wrap;
-    }
-    .count{color:rgba(233,238,255,.82); font-size:14px}
-    .search{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      padding:10px 12px;
-      border:1px solid var(--border);
-      border-radius:999px;
-      background: rgba(255,255,255,.04);
-      min-width:min(420px, 100%);
-    }
-    .search input{
-      width:100%;
-      border:0;
-      outline:0;
-      background:transparent;
-      color:var(--text);
-      font-size:14px;
-    }
-    .search input::placeholder{color: rgba(183,195,255,.75)}
-
-    .grid{
-      display:grid;
-      gap:12px;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      margin-top:8px;
-    }
-    @media (min-width: 640px){
-      .grid{grid-template-columns: repeat(3, minmax(0, 1fr));}
-    }
-    @media (min-width: 980px){
-      .grid{grid-template-columns: repeat(4, minmax(0, 1fr));}
-    }
-
-    figure{
-      margin:0;
-      border-radius: 14px;
-      overflow:hidden;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.03);
-      box-shadow: 0 8px 20px rgba(0,0,0,.25);
-      cursor: zoom-in;
-      position:relative;
-    }
-    figure img{
-      width:100%;
-      height: 210px;
-      object-fit: cover;
-      display:block;
-      transform: scale(1.01);
-      transition: transform .2s ease;
-    }
-    figure:hover img{transform: scale(1.05)}
-    figcaption{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      padding:10px 10px 11px;
-      font-size:13px;
-      color: rgba(233,238,255,.86);
-      background: rgba(10,16,33,.6);
-      border-top:1px solid var(--border);
-    }
-    figcaption span:last-child{color: rgba(183,195,255,.9)}
-
-    footer{
-      margin-top:18px;
-      color: rgba(233,238,255,.7);
-      font-size:13px;
-      text-align:center;
-    }
-
-    /* Lightbox */
-    .lightbox{
-      position:fixed;
-      inset:0;
-      background: rgba(0,0,0,.75);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-      z-index:9999;
-    }
-    .lightbox[open]{display:flex;}
-    .lb-card{
-      width:min(980px, 100%);
-      background: rgba(15,23,51,.92);
-      border:1px solid var(--border);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .lb-top{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:center;
-      padding:12px 14px;
-      border-bottom:1px solid var(--border);
-    }
-    .lb-top .title{
-      font-size:14px;
-      color: rgba(233,238,255,.88);
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-    .lb-actions{
-      display:flex;
-      gap:8px;
-      align-items:center;
-    }
-    .btn{
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      padding:8px 10px;
-      border-radius: 999px;
-      cursor:pointer;
-      font-size:13px;
-    }
-    .btn:hover{background: rgba(255,255,255,.10)}
-    .lb-img{
-      width:100%;
-      height:min(76vh, 820px);
-      background:#0b1020;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .lb-img img{
-      max-width:100%;
-      max-height:100%;
-      display:block;
-    }
+    html { -webkit-text-size-adjust: 100%; }
   </style>
 </head>
 
-<body>
-  <div class="wrap">
-    <header>
-      <p class="kicker">Indian.SG • Quick Guide</p>
-      <h1>📲✨ 𝐓𝐡𝐚𝐢𝐩𝐮𝐬𝐚𝐦 𝟐𝟎𝟐𝟔 𝐄-𝐆𝐮𝐢𝐝𝐞 𝐢𝐬 𝐡𝐞𝐫𝐞!</h1>
-      <p class="lead">
-        MRT exits, Temple access, key routes — all in one quick guide.<br/>
+<body class="bg-slate-50 text-slate-900">
+  <!-- Top bar -->
+  <header class="border-b bg-white">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+      <div class="flex items-center gap-3">
+        <!-- Simple mark (replace with your logo if you want) -->
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white font-semibold">
+          iSG
+        </div>
+        <div>
+          <p class="text-sm font-semibold tracking-wide text-slate-900">Indian.SG</p>
+          <p class="text-xs text-slate-600">Community guides</p>
+        </div>
+      </div>
+      <div class="text-right">
+        <p class="text-sm font-medium text-slate-900">Thaipusam 2026</p>
+        <p class="text-xs text-slate-600">E-Guide</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+    <div class="rounded-2xl border bg-white p-6 shadow-sm sm:p-8">
+      <p class="text-sm font-semibold text-slate-700">📲✨ 𝐓𝐡𝐚𝐢𝐩𝐮𝐬𝐚𝐦 𝟐𝟎𝟐𝟔 𝐄-𝐆𝐮𝐢𝐝𝐞 𝐢𝐬 𝐡𝐞𝐫𝐞!</p>
+      <h1 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+        MRT exits, Temple access, key routes — all in one quick guide.
+      </h1>
+      <p class="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base">
         Save it, share it and walk in prepared.
       </p>
 
-      <div class="cta">
-        <div class="pill">✅ <span>Best viewed on mobile</span></div>
-        <div class="pill">🗺️ <span>Swipe + tap to zoom</span></div>
-        <div class="pill">🔗 <span><small>Hosted on</small>&nbsp;GitHub Pages</span></div>
-      </div>
-    </header>
-
-    <div class="toolbar">
-      <div class="count" id="count">Loading…</div>
-      <div class="search" role="search" aria-label="Search images">
-        🔎
-        <input id="q" type="search" placeholder="Search by filename (e.g., 1982)" autocomplete="off" />
+      <div class="mt-5 flex flex-wrap gap-2">
+        <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+          Clear route visuals
+        </span>
+        <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+          MRT exit guidance
+        </span>
+        <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+          Temple access notes
+        </span>
       </div>
     </div>
+  </section>
 
-    <main class="grid" id="grid" aria-label="Thaipusam 2026 E-Guide images"></main>
+  <!-- Gallery -->
+  <main class="mx-auto max-w-6xl px-4 pb-14 sm:px-6">
+    <div class="mb-4 flex items-end justify-between">
+      <div>
+        <h2 class="text-lg font-semibold text-slate-900">Quick Guide Pages</h2>
+        <p class="mt-1 text-sm text-slate-600">Tap any page to view in full.</p>
+      </div>
+      <p id="count" class="text-sm text-slate-600"></p>
+    </div>
 
-    <footer>
-      © <span id="year"></span> Indian.SG • Please share this guide with family & friends.
+    <div id="grid" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4"></div>
+
+    <footer class="mt-10 border-t pt-6 text-sm text-slate-500">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p>© <span id="year"></span> Indian.SG</p>
+        <p class="text-slate-500">For community reference.</p>
+      </div>
     </footer>
-  </div>
+  </main>
 
   <!-- Lightbox -->
-  <dialog class="lightbox" id="lightbox" aria-label="Image viewer">
-    <div class="lb-card">
-      <div class="lb-top">
-        <div class="title" id="lbTitle"></div>
-        <div class="lb-actions">
-          <button class="btn" id="prevBtn" type="button">← Prev</button>
-          <button class="btn" id="nextBtn" type="button">Next →</button>
-          <button class="btn" id="closeBtn" type="button">✕ Close</button>
+  <div id="lightbox" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/60"></div>
+
+    <div class="relative mx-auto flex h-full max-w-5xl items-center px-4 sm:px-6">
+      <div class="w-full overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div class="flex items-center justify-between border-b px-4 py-3 sm:px-5">
+          <div class="min-w-0">
+            <p class="truncate text-sm font-medium text-slate-900" id="lbTitle">Image</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="prevBtn"
+              class="rounded-lg border px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+              Prev
+            </button>
+            <button id="nextBtn"
+              class="rounded-lg border px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+              Next
+            </button>
+            <button id="closeBtn"
+              class="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800">
+              Close
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-slate-100 p-2 sm:p-3">
+          <div class="flex items-center justify-center">
+            <img id="lbImg" alt="" class="max-h-[78vh] w-auto rounded-xl bg-white object-contain" />
+          </div>
         </div>
       </div>
-      <div class="lb-img">
-        <img id="lbImg" alt="" />
-      </div>
     </div>
-  </dialog>
+  </div>
 
   <script>
-    // 1) Put your images in the SAME folder as this index.html
-    // 2) If your filenames differ, edit the list below.
-
-    // Generates: IMG_1977.jpeg ... IMG_1986.jpeg
+    // If your filenames differ, update here.
     const images = Array.from({ length: 10 }, (_, i) => {
-      const n = 1977 + i;
-      return { src: `IMG_${n}.jpeg`, name: `IMG_${n}.jpeg` };
+      const n = 1977 + i; // 1977..1986
+      return { src: `IMG_${n}.jpeg`, name: `IMG_${n}.jpeg`, label: `Page ${i + 1}` };
     });
 
     const grid = document.getElementById("grid");
     const count = document.getElementById("count");
-    const q = document.getElementById("q");
     const year = document.getElementById("year");
     year.textContent = new Date().getFullYear();
 
-    // Lightbox
     const lightbox = document.getElementById("lightbox");
     const lbImg = document.getElementById("lbImg");
     const lbTitle = document.getElementById("lbTitle");
     const prevBtn = document.getElementById("prevBtn");
     const nextBtn = document.getElementById("nextBtn");
     const closeBtn = document.getElementById("closeBtn");
+
     let currentIndex = 0;
-    let currentList = images;
 
     function openLightbox(index) {
       currentIndex = index;
-      const item = currentList[currentIndex];
+      const item = images[currentIndex];
       lbImg.src = item.src;
       lbImg.alt = item.name;
-      lbTitle.textContent = item.name;
-      lightbox.setAttribute("open", "");
-      document.body.style.overflow = "hidden";
+      lbTitle.textContent = item.label;
+      lightbox.classList.remove("hidden");
+      document.body.classList.add("overflow-hidden");
     }
 
     function closeLightbox() {
-      lightbox.removeAttribute("open");
-      document.body.style.overflow = "";
+      lightbox.classList.add("hidden");
+      document.body.classList.remove("overflow-hidden");
     }
 
     function step(dir) {
-      if (!currentList.length) return;
-      currentIndex = (currentIndex + dir + currentList.length) % currentList.length;
+      currentIndex = (currentIndex + dir + images.length) % images.length;
       openLightbox(currentIndex);
     }
 
-    function render(list) {
-      currentList = list;
+    function render() {
+      count.textContent = `${images.length} pages`;
       grid.innerHTML = "";
-      count.textContent = `${list.length} image${list.length === 1 ? "" : "s"}`;
 
-      list.forEach((img, idx) => {
-        const fig = document.createElement("figure");
-        fig.tabIndex = 0;
-        fig.setAttribute("role", "button");
-        fig.setAttribute("aria-label", `Open ${img.name}`);
+      images.forEach((img, idx) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className =
+          "group w-full overflow-hidden rounded-2xl border bg-white text-left shadow-sm transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-slate-900/20";
+        card.setAttribute("aria-label", `Open ${img.label}`);
+
+        const frame = document.createElement("div");
+        frame.className = "aspect-[3/4] bg-slate-100 overflow-hidden";
 
         const image = document.createElement("img");
         image.loading = "lazy";
         image.src = img.src;
-        image.alt = img.name;
+        image.alt = img.label;
+        image.className = "h-full w-full object-cover transition duration-200 group-hover:scale-[1.02]";
 
-        const cap = document.createElement("figcaption");
-        cap.innerHTML = `<span>Tap to view</span><span>${img.name}</span>`;
+        const meta = document.createElement("div");
+        meta.className = "flex items-center justify-between gap-3 px-4 py-3";
 
-        fig.appendChild(image);
-        fig.appendChild(cap);
+        const left = document.createElement("div");
+        left.className = "min-w-0";
+        left.innerHTML =
+          `<p class="text-sm font-semibold text-slate-900">${img.label}</p>
+           <p class="truncate text-xs text-slate-500">${img.name}</p>`;
 
-        fig.addEventListener("click", () => openLightbox(idx));
-        fig.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" || e.key === " ") openLightbox(idx);
-        });
+        const badge = document.createElement("span");
+        badge.className =
+          "shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700";
+        badge.textContent = "View";
 
-        grid.appendChild(fig);
+        frame.appendChild(image);
+        meta.appendChild(left);
+        meta.appendChild(badge);
+
+        card.appendChild(frame);
+        card.appendChild(meta);
+
+        card.addEventListener("click", () => openLightbox(idx));
+
+        grid.appendChild(card);
       });
     }
 
-    // Search/filter
-    q.addEventListener("input", () => {
-      const term = q.value.trim().toLowerCase();
-      const filtered = images.filter(x => x.name.toLowerCase().includes(term));
-      render(filtered);
-    });
-
-    // Lightbox controls
+    // Lightbox actions
     prevBtn.addEventListener("click", () => step(-1));
     nextBtn.addEventListener("click", () => step(1));
     closeBtn.addEventListener("click", closeLightbox);
 
-    // Close if backdrop clicked
+    // Close if clicking outside the card
     lightbox.addEventListener("click", (e) => {
-      if (e.target === lightbox) closeLightbox();
+      if (e.target === lightbox || e.target.classList.contains("bg-black/60")) closeLightbox();
     });
 
-    // Keyboard navigation
+    // Keyboard support
     window.addEventListener("keydown", (e) => {
-      if (!lightbox.hasAttribute("open")) return;
+      if (lightbox.classList.contains("hidden")) return;
       if (e.key === "Escape") closeLightbox();
       if (e.key === "ArrowLeft") step(-1);
       if (e.key === "ArrowRight") step(1);
     });
 
-    render(images);
+    render();
   </script>
 </body>
 </html>
