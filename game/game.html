@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>விளையாட்டு | Tug of War</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="game-page">
+
+<!-- Score bar -->
+<div class="score-bar">
+  <div class="score-team t1">
+    <div class="team-label" id="t1Label">குழு 1</div>
+    <div class="team-score" id="t1Score">0</div>
+  </div>
+
+  <div class="timer-block" id="timerBlock">
+    ⏱ <span id="timerDisplay">01:00</span>
+  </div>
+
+  <div class="score-team t2">
+    <div class="team-label" id="t2Label">குழு 2</div>
+    <div class="team-score" id="t2Score">0</div>
+  </div>
+</div>
+
+<!-- Tug arena -->
+<div class="tug-arena">
+  <div class="tug-track" id="tugTrack">
+    <svg class="tug-svg" viewBox="0 0 560 90" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- Ground -->
+      <line x1="0" y1="84" x2="560" y2="84" stroke="#D0D0D0" stroke-width="1.5"/>
+
+      <!-- Team 1 (blue) — leaning back-left, right arm holds rope -->
+      <g fill="none" stroke="#1565C0" stroke-linecap="round">
+        <g transform="translate(109,22)">
+          <circle cx="0" cy="0" r="9" fill="#1565C0" stroke="none"/>
+          <line x1="0" y1="9" x2="-10" y2="38" stroke-width="3.5"/>
+          <line x1="-3" y1="18" x2="20" y2="14" stroke-width="3"/>
+          <line x1="-3" y1="18" x2="-17" y2="26" stroke-width="3"/>
+          <line x1="-10" y1="38" x2="-2" y2="62" stroke-width="3.5"/>
+          <line x1="-10" y1="38" x2="-22" y2="62" stroke-width="3.5"/>
+        </g>
+        <g transform="translate(68,22)">
+          <circle cx="0" cy="0" r="9" fill="#1565C0" stroke="none"/>
+          <line x1="0" y1="9" x2="-10" y2="38" stroke-width="3.5"/>
+          <line x1="-3" y1="18" x2="20" y2="14" stroke-width="3"/>
+          <line x1="-3" y1="18" x2="-17" y2="26" stroke-width="3"/>
+          <line x1="-10" y1="38" x2="-2" y2="62" stroke-width="3.5"/>
+          <line x1="-10" y1="38" x2="-22" y2="62" stroke-width="3.5"/>
+        </g>
+        <g transform="translate(27,22)">
+          <circle cx="0" cy="0" r="9" fill="#1565C0" stroke="none"/>
+          <line x1="0" y1="9" x2="-10" y2="38" stroke-width="3.5"/>
+          <line x1="-3" y1="18" x2="20" y2="14" stroke-width="3"/>
+          <line x1="-3" y1="18" x2="-17" y2="26" stroke-width="3"/>
+          <line x1="-10" y1="38" x2="-2" y2="62" stroke-width="3.5"/>
+          <line x1="-10" y1="38" x2="-22" y2="62" stroke-width="3.5"/>
+        </g>
+      </g>
+
+      <!-- Rope — from team1 rope-arm tip (~129,36) to team2 rope-arm tip (~431,36) -->
+      <rect x="129" y="33" width="302" height="7" rx="3.5" fill="#8D6E63"/>
+      <rect x="129" y="33" width="302" height="2.5" rx="1" fill="#A1887F" opacity="0.55"/>
+
+      <!-- Team 2 (red) — mirror of team 1 via translate+scale -->
+      <g transform="translate(560,0) scale(-1,1)" fill="none" stroke="#C62828" stroke-linecap="round">
+        <g transform="translate(109,22)">
+          <circle cx="0" cy="0" r="9" fill="#C62828" stroke="none"/>
+          <line x1="0" y1="9" x2="-10" y2="38" stroke-width="3.5"/>
+          <line x1="-3" y1="18" x2="20" y2="14" stroke-width="3"/>
+          <line x1="-3" y1="18" x2="-17" y2="26" stroke-width="3"/>
+          <line x1="-10" y1="38" x2="-2" y2="62" stroke-width="3.5"/>
+          <line x1="-10" y1="38" x2="-22" y2="62" stroke-width="3.5"/>
+        </g>
+        <g transform="translate(68,22)">
+          <circle cx="0" cy="0" r="9" fill="#C62828" stroke="none"/>
+          <line x1="0" y1="9" x2="-10" y2="38" stroke-width="3.5"/>
+          <line x1="-3" y1="18" x2="20" y2="14" stroke-width="3"/>
+          <line x1="-3" y1="18" x2="-17" y2="26" stroke-width="3"/>
+          <line x1="-10" y1="38" x2="-2" y2="62" stroke-width="3.5"/>
+          <line x1="-10" y1="38" x2="-22" y2="62" stroke-width="3.5"/>
+        </g>
+        <g transform="translate(27,22)">
+          <circle cx="0" cy="0" r="9" fill="#C62828" stroke="none"/>
+          <line x1="0" y1="9" x2="-10" y2="38" stroke-width="3.5"/>
+          <line x1="-3" y1="18" x2="20" y2="14" stroke-width="3"/>
+          <line x1="-3" y1="18" x2="-17" y2="26" stroke-width="3"/>
+          <line x1="-10" y1="38" x2="-2" y2="62" stroke-width="3.5"/>
+          <line x1="-10" y1="38" x2="-22" y2="62" stroke-width="3.5"/>
+        </g>
+      </g>
+
+    </svg>
+  </div>
+</div>
+
+<!-- Question panels -->
+<div class="question-panels">
+  <!-- Team 1 panel -->
+  <div class="q-panel t1">
+    <div class="q-panel-header">
+      <span class="panel-team-name" id="p1Name">குழு 1</span>
+      <span class="panel-score" id="p1Score">0</span>
+    </div>
+    <div class="question-text" id="q1Text">கேள்வி ஏற்றுகிறது...</div>
+    <div class="options-list" id="opts1"></div>
+  </div>
+
+  <!-- Team 2 panel -->
+  <div class="q-panel t2">
+    <div class="q-panel-header">
+      <span class="panel-team-name" id="p2Name">குழு 2</span>
+      <span class="panel-score" id="p2Score">0</span>
+    </div>
+    <div class="question-text" id="q2Text">கேள்வி ஏற்றுகிறது...</div>
+    <div class="options-list" id="opts2"></div>
+  </div>
+</div>
+
+<script src="js/state.js"></script>
+<script src="js/questions.js"></script>
+<script src="js/game.js"></script>
+
+</body>
+</html>

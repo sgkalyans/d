@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>விளையாட்டு அமைப்பு | Tug of War</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav-bar">
+  <a class="home-link" href="index.html">🏠 HOME</a>
+  <span class="lang-badge">🇮🇳 தமிழ்</span>
+</nav>
+
+<main class="setup-wrapper">
+  <h1>விளையாட்டு அமைப்பு</h1>
+
+  <div class="card">
+
+    <!-- Team Names -->
+    <div class="setup-section">
+      <label>குழு பெயர்கள்</label>
+      <div class="team-inputs">
+        <div class="team-input-group t1">
+          <span>குழு 1</span>
+          <input type="text" id="team1Name" maxlength="20" placeholder="குழு 1" value="குழு 1" />
+        </div>
+        <div class="team-input-group t2">
+          <span>குழு 2</span>
+          <input type="text" id="team2Name" maxlength="20" placeholder="குழு 2" value="குழு 2" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Difficulty -->
+    <div class="setup-section">
+      <label>சிரம நிலை</label>
+      <div class="difficulty-cards">
+
+        <div class="diff-card selected" data-diff="easy" onclick="selectDiff(this)">
+          <div class="diff-icon">🌱</div>
+          <div class="diff-name">எளிது</div>
+          <div class="diff-desc">தமிழ் அகரவரிசை</div>
+        </div>
+
+        <div class="diff-card locked" data-diff="moderate">
+          <span class="coming-tag">SOON</span>
+          <div class="diff-icon">🔥</div>
+          <div class="diff-name">நடுத்தரம்</div>
+          <div class="diff-desc">தமிழ் இலக்கணம்</div>
+        </div>
+
+        <div class="diff-card locked" data-diff="hard">
+          <span class="coming-tag">SOON</span>
+          <div class="diff-icon">⚡</div>
+          <div class="diff-name">கடினம்</div>
+          <div class="diff-desc">தமிழ் இலக்கியம்</div>
+        </div>
+
+      </div>
+    </div>
+
+    <button class="btn btn-primary setup-start-btn" onclick="startGame()">
+      🎮 விளையாட்டு தொடங்கு
+    </button>
+  </div>
+</main>
+
+<script src="js/state.js"></script>
+<script>
+  let selectedDiff = 'easy';
+
+  function selectDiff(el) {
+    if (el.classList.contains('locked')) return;
+    document.querySelectorAll('.diff-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedDiff = el.dataset.diff;
+  }
+
+  function startGame() {
+    const t1 = document.getElementById('team1Name').value.trim() || 'குழு 1';
+    const t2 = document.getElementById('team2Name').value.trim() || 'குழு 2';
+    TOW.save('team1', t1);
+    TOW.save('team2', t2);
+    TOW.save('difficulty', selectedDiff);
+    TOW.save('score1', 0);
+    TOW.save('score2', 0);
+    window.location.href = 'game.html';
+  }
+</script>
+
+</body>
+</html>

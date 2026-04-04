@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>முடிவுகள் | Tug of War</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .trophy { font-size: 64px; margin-bottom: 8px; }
+    .share-copied {
+      font-size: 13px;
+      color: var(--green);
+      margin-top: 6px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav-bar">
+  <a class="home-link" href="index.html">🏠 HOME</a>
+  <span class="lang-badge">🇮🇳 தமிழ்</span>
+</nav>
+
+<main class="results-wrapper">
+
+  <div class="trophy" id="trophyIcon">🏆</div>
+  <div class="winner-banner" id="winnerBanner">வெற்றியாளர்!</div>
+  <p id="winnerSub" style="color:#757575; margin-bottom:4px; font-size:15px;"></p>
+
+  <!-- Score boxes -->
+  <div class="score-display">
+    <div class="score-box t1">
+      <div class="sb-name" id="r1Name">குழு 1</div>
+      <div class="sb-score" id="r1Score">0</div>
+    </div>
+    <div class="score-box t2">
+      <div class="sb-name" id="r2Name">குழு 2</div>
+      <div class="sb-score" id="r2Score">0</div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="action-buttons">
+    <button class="btn btn-green" onclick="doDownload()">
+      ⬇ சான்றிதழ் பதிவிறக்கு
+    </button>
+    <button class="btn btn-primary" onclick="doShare()">
+      📤 முடிவை பகிர்
+    </button>
+    <p class="share-copied" id="shareCopied">✅ தகவல் நகலெடுக்கப்பட்டது!</p>
+    <button class="btn btn-outline" onclick="window.location.href='setup.html'">
+      🔄 மீண்டும் விளையாடு
+    </button>
+    <button class="btn btn-outline" onclick="window.location.href='index.html'" style="border-color:#9E9E9E; color:#616161;">
+      🏠 முகப்பு பக்கம்
+    </button>
+  </div>
+</main>
+
+<script src="js/state.js"></script>
+<script src="js/certificate.js"></script>
+<script>
+  const team1  = TOW.load('team1',  'குழு 1');
+  const team2  = TOW.load('team2',  'குழு 2');
+  const score1 = TOW.load('score1', 0);
+  const score2 = TOW.load('score2', 0);
+
+  // Populate names and scores
+  document.getElementById('r1Name').textContent  = team1;
+  document.getElementById('r2Name').textContent  = team2;
+  document.getElementById('r1Score').textContent = score1;
+  document.getElementById('r2Score').textContent = score2;
+
+  // Winner
+  const banner = document.getElementById('winnerBanner');
+  const sub    = document.getElementById('winnerSub');
+  const trophy = document.getElementById('trophyIcon');
+
+  if (score1 > score2) {
+    banner.textContent = team1 + ' வெற்றி பெற்றது! 🎉';
+    banner.className   = 'winner-banner t1';
+    sub.textContent    = team1 + ': ' + score1 + ' — ' + team2 + ': ' + score2;
+  } else if (score2 > score1) {
+    banner.textContent = team2 + ' வெற்றி பெற்றது! 🎉';
+    banner.className   = 'winner-banner t2';
+    sub.textContent    = team2 + ': ' + score2 + ' — ' + team1 + ': ' + score1;
+  } else {
+    trophy.textContent = '🤝';
+    banner.textContent = 'சமநிலை!';
+    banner.className   = 'winner-banner draw';
+    sub.textContent    = team1 + ' மற்றும் ' + team2 + ' சமம்: ' + score1;
+  }
+
+  function doDownload() {
+    downloadCertificate(team1, team2, score1, score2);
+  }
+
+  function doShare() {
+    const winner = score1 > score2 ? team1 : score2 > score1 ? team2 : 'சமநிலை';
+    const text = `🎮 Tug of War: Tamil Language\n` +
+                 `${team1}: ${score1} | ${team2}: ${score2}\n` +
+                 (score1 === score2 ? `சமநிலை!` : `🏆 ${winner} வெற்றி பெற்றது!`);
+
+    if (navigator.share) {
+      navigator.share({ title: 'Tug of War Result', text }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(text).then(() => {
+        const el = document.getElementById('shareCopied');
+        el.style.display = 'block';
+        setTimeout(() => { el.style.display = 'none'; }, 3000);
+      });
+    }
+  }
+</script>
+
+</body>
+</html>
