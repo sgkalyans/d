@@ -405,10 +405,34 @@ body {
 
 /* ── Responsive ── */
 @media (max-width: 600px) {
+  /* Landing & setup pages — stack vertically */
   .rule-cards { grid-template-columns: 1fr; }
   .team-inputs { flex-direction: column; }
   .difficulty-cards { flex-direction: column; }
-  .question-panels { flex-direction: column; }
-  .q-panel.t1 { border-right: none; border-bottom: 2px solid var(--border); }
+
+  /* Tug arena shrinks a little */
   .tug-arena { min-height: 90px; }
+
+  /* Score bar — compact */
+  .score-bar { padding: 6px 8px; }
+  .score-team { min-width: 52px; }
+  .score-team .team-label { font-size: 10px; letter-spacing: 0; }
+  .score-team .team-score { font-size: 22px; }
+  .timer-block { font-size: 15px; padding: 5px 10px; gap: 5px; }
+
+  /* Question panels — KEEP side by side, just compact */
+  .question-panels { flex-direction: row; }
+  .q-panel { padding: 10px 7px; }
+  .q-panel.t1 { border-right: 2px solid var(--border); }
+
+  .q-panel-header { margin-bottom: 8px; }
+  .q-panel-header .panel-team-name { font-size: 11px; padding: 3px 8px; }
+  .q-panel-header .panel-score { font-size: 17px; }
+
+  .question-text { font-size: 12px; margin-bottom: 10px; min-height: unset; line-height: 1.4; }
+
+  .option-btn { padding: 7px 6px; gap: 6px; font-size: 12px; border-radius: 6px; }
+  .option-btn .opt-label { width: 20px; height: 20px; font-size: 9px; flex-shrink: 0; }
+
+  .options-list { gap: 6px; }
 }
