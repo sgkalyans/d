@@ -291,34 +291,6 @@
             );
     }
 
-    /* Close button */
-
-    .charm-close {
-        position: absolute;
-
-        top: 12px;
-        right: 2px;
-
-        width: 28px;
-        height: 28px;
-
-        border: 0;
-        border-radius: 50%;
-
-        background: white;
-
-        box-shadow:
-            0 2px 8px rgba(0,0,0,.18);
-
-        color: #17395f;
-
-        font-size: 18px;
-
-        cursor: pointer;
-
-        z-index: 10;
-    }
-
     /* Mobile */
 
     @media (max-width: 600px) {
@@ -983,14 +955,6 @@
     </div>
 
 
-    <button
-        class="charm-close"
-        id="charmClose"
-        aria-label="Close digital charm">
-        ×
-    </button>
-
-
 </div>
 
 
@@ -999,11 +963,6 @@
 const charm =
     document.getElementById(
         "indian-sg-charm"
-    );
-
-const closeButton =
-    document.getElementById(
-        "charmClose"
     );
 
 const rope =
@@ -1102,13 +1061,6 @@ const MAX_Y =
 charm.addEventListener(
     "pointerdown",
     function(event) {
-
-        if (
-            event.target ===
-            closeButton
-        ) {
-            return;
-        }
 
         dragging = true;
 
@@ -1398,26 +1350,6 @@ function updateCharm() {
         )
         `;
 }
-
-
-/* =========================================
-   CLOSE
-   ========================================= */
-
-closeButton.addEventListener(
-    "click",
-    function() {
-
-        charm.style.transition =
-            "transform .5s ease, opacity .5s ease";
-
-        charm.style.transform =
-            `translateY(-360px) rotate(-10deg) scale(${baseScale})`;
-
-        charm.style.opacity =
-            "0";
-    }
-);
 
 
 /* Start physics */
