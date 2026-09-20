@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Indian.SG Digital Charm</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f7f4ee;
+        color: #102d55;
+        min-height: 100vh;
+    }
+
+    /* Demo website */
+    .site-header {
+        height: 72px;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        padding: 0 40px;
+        border-bottom: 1px solid #e8e8e8;
+    }
+
+    .logo {
+        font-size: 27px;
+        font-weight: 800;
+    }
+
+    .logo span {
+        color: #e9652d;
+    }
+
+    .nav {
+        margin-left: auto;
+        display: flex;
+        gap: 28px;
+        font-size: 14px;
+    }
+
+    .hero {
+        min-height: 430px;
+        padding: 100px 8%;
+        background:
+            linear-gradient(
+                120deg,
+                rgba(255,248,238,.96),
+                rgba(234,242,249,.92)
+            );
+    }
+
+    .hero h1 {
+        max-width: 600px;
+        font-family: Georgia, serif;
+        font-size: clamp(42px, 6vw, 72px);
+        line-height: 1;
+        margin: 0 0 25px;
+    }
+
+    .hero p {
+        font-size: 20px;
+        color: #637186;
+    }
+
+    /* ==========================================
+       INDIAN.SG DIGITAL CHARM
+       ========================================== */
+
+    #indian-sg-charm {
+        position: fixed;
+        top: 0;
+        right: 24px;
+
+        width: 155px;
+        height: 330px;
+
+        z-index: 99999;
+
+        touch-action: none;
+
+        user-select: none;
+
+        cursor: grab;
+
+        transform-origin: 50% 0;
+
+        /* Important for smooth physics */
+        will-change: transform;
+    }
+
+    #indian-sg-charm.dragging {
+        cursor: grabbing;
+    }
+
+    /* Rope */
+
+    .charm-rope {
+        position: absolute;
+
+        top: 0;
+        left: 50%;
+
+        width: 6px;
+        height: 82px;
+
+        transform: translateX(-50%);
+
+        border-radius: 10px;
+
+        background:
+            repeating-linear-gradient(
+                135deg,
+                #9b6514 0px,
+                #9b6514 3px,
+                #e5b842 3px,
+                #e5b842 6px
+            );
+    }
+
+    /* Top bead */
+
+    .charm-bead {
+        position: absolute;
+
+        left: 50%;
+
+        transform: translateX(-50%);
+
+        border-radius: 50%;
+
+        box-shadow:
+            inset 2px 2px 4px rgba(255,255,255,.35),
+            2px 3px 5px rgba(0,0,0,.18);
+    }
+
+    .red-bead {
+        top: 72px;
+
+        width: 18px;
+        height: 18px;
+
+        background: #d51f25;
+    }
+
+    .black-bead {
+        top: 90px;
+
+        width: 17px;
+        height: 17px;
+
+        background: #151515;
+    }
+
+    /* ==========================================
+       BOMMAI IMAGE
+       ========================================== */
+
+    .bommai {
+        position: absolute;
+
+        top: 103px;
+        left: 50%;
+
+        width: 135px;
+        height: 135px;
+
+        transform: translateX(-50%);
+
+        object-fit: contain;
+
+        pointer-events: none;
+
+        filter:
+            drop-shadow(0 8px 7px rgba(0,0,0,.22));
+    }
+
+    /* Lower beads */
+
+    .lower-black {
+        top: 236px;
+
+        width: 15px;
+        height: 15px;
+
+        background: #151515;
+    }
+
+    .lower-red {
+        top: 251px;
+
+        width: 18px;
+        height: 18px;
+
+        background: #d51f25;
+    }
+
+    /* Bell */
+
+    .bell {
+        position: absolute;
+
+        top: 270px;
+        left: 50%;
+
+        width: 34px;
+        height: 27px;
+
+        transform: translateX(-50%);
+
+        border-radius:
+            5px 5px 14px 14px;
+
+        background:
+            linear-gradient(
+                90deg,
+                #9c650c,
+                #f3c64e,
+                #9c650c
+            );
+
+        border: 2px solid #9b650d;
+
+        box-shadow:
+            0 4px 6px rgba(0,0,0,.2);
+    }
+
+    .bell::after {
+        content: "";
+
+        position: absolute;
+
+        bottom: -7px;
+        left: 12px;
+
+        width: 7px;
+        height: 7px;
+
+        border-radius: 50%;
+
+        background: #87540b;
+    }
+
+    /* Tassel */
+
+    .tassel {
+        position: absolute;
+
+        top: 299px;
+        left: 50%;
+
+        width: 32px;
+        height: 18px;
+
+        transform:
+            translateX(-50%);
+
+        border-radius:
+            0 0 12px 12px;
+
+        background:
+            repeating-linear-gradient(
+                90deg,
+                #c72026 0px,
+                #c72026 4px,
+                #ef4949 4px,
+                #ef4949 8px
+            );
+    }
+
+    /* Close button */
+
+    .charm-close {
+        position: absolute;
+
+        top: 12px;
+        right: 2px;
+
+        width: 28px;
+        height: 28px;
+
+        border: 0;
+        border-radius: 50%;
+
+        background: white;
+
+        box-shadow:
+            0 2px 8px rgba(0,0,0,.18);
+
+        color: #17395f;
+
+        font-size: 18px;
+
+        cursor: pointer;
+
+        z-index: 10;
+    }
+
+    /* Message */
+
+    .charm-message {
+        position: absolute;
+
+        right: 145px;
+        top: 125px;
+
+        width: 235px;
+
+        padding: 16px 18px;
+
+        background: #fffdf8;
+
+        border:
+            1px solid #eadfc9;
+
+        border-radius: 15px;
+
+        box-shadow:
+            0 8px 25px rgba(0,0,0,.12);
+
+        opacity: 0;
+
+        transform:
+            translateX(10px)
+            scale(.96);
+
+        pointer-events: none;
+
+        transition:
+            opacity .25s ease,
+            transform .25s ease;
+    }
+
+    .charm-message.show {
+        opacity: 1;
+
+        transform:
+            translateX(0)
+            scale(1);
+    }
+
+    .charm-message strong {
+        display: block;
+
+        font-size: 14px;
+
+        margin-bottom: 5px;
+    }
+
+    .charm-message span {
+        font-size: 12px;
+
+        color: #68778a;
+    }
+
+    /* Instructions */
+
+    .instructions {
+        position: fixed;
+
+        bottom: 25px;
+        left: 50%;
+
+        transform:
+            translateX(-50%);
+
+        background: white;
+
+        padding: 12px 20px;
+
+        border-radius: 30px;
+
+        box-shadow:
+            0 5px 20px rgba(0,0,0,.1);
+
+        font-size: 13px;
+
+        color: #53657a;
+
+        z-index: 100000;
+    }
+
+    /* Mobile */
+
+    @media (max-width: 600px) {
+
+        .site-header {
+            padding: 0 18px;
+        }
+
+        .nav {
+            display: none;
+        }
+
+        #indian-sg-charm {
+            right: 7px;
+
+            transform-origin:
+                50% 0;
+
+            transform:
+                scale(.78);
+        }
+
+        .charm-message {
+            right: 105px;
+
+            width: 190px;
+
+            top: 115px;
+        }
+
+        .instructions {
+            width: 90%;
+
+            text-align: center;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<header class="site-header">
+
+    <div class="logo">
+        Indian<span>.SG</span>
+    </div>
+
+    <nav class="nav">
+        <span>Events</span>
+        <span>Community</span>
+        <span>Culture</span>
+        <span>Stories</span>
+    </nav>
+
+</header>
+
+
+<section class="hero">
+
+    <h1>
+        Connecting You
+        with Community
+    </h1>
+
+    <p>
+        Events. People. Culture.
+        Always Together.
+    </p>
+
+</section>
+
+
+<!-- =========================================
+     DIGITAL CHARM
+     ========================================= -->
+
+<div id="indian-sg-charm">
+
+    <div class="charm-rope"></div>
+
+    <div class="charm-bead red-bead"></div>
+
+    <div class="charm-bead black-bead"></div>
+
+
+    <!--
+        REPLACE THIS IMAGE URL
+        with your Drishti Bommai PNG.
+    -->
+
+    <img
+        class="bommai"
+        src="indian-sg-drishti-bommai.png"
+        alt="Indian.SG Digital Charm"
+    >
+
+
+    <div
+        class="charm-bead lower-black">
+    </div>
+
+    <div
+        class="charm-bead lower-red">
+    </div>
+
+
+    <div class="bell"></div>
+
+    <div class="tassel"></div>
+
+
+    <button
+        class="charm-close"
+        id="charmClose"
+        aria-label="Close digital charm">
+        ×
+    </button>
+
+
+    <div
+        class="charm-message"
+        id="charmMessage">
+
+        <strong>
+            A little piece of culture,
+            wherever you are.
+        </strong>
+
+        <span>
+            Indian.SG Digital Charm
+        </span>
+
+    </div>
+
+</div>
+
+
+<div class="instructions">
+    👆 Press the Bommai • Pull it • Release
+</div>
+
+
+<script>
+
+const charm =
+    document.getElementById(
+        "indian-sg-charm"
+    );
+
+const message =
+    document.getElementById(
+        "charmMessage"
+    );
+
+const closeButton =
+    document.getElementById(
+        "charmClose"
+    );
+
+
+/* =========================================
+   PHYSICS
+   ========================================= */
+
+let dragging = false;
+
+let pointerStartX = 0;
+let pointerStartY = 0;
+
+let currentX = 0;
+let currentY = 0;
+
+let velocityX = 0;
+let velocityY = 0;
+
+let lastX = 0;
+let lastY = 0;
+
+let lastTime = 0;
+
+
+/* Spring strength */
+
+const SPRING =
+    0.055;
+
+
+/* Damping */
+
+const DAMPING =
+    0.82;
+
+
+/* Maximum movement */
+
+const MAX_X =
+    140;
+
+const MAX_Y =
+    180;
+
+
+/* =========================================
+   POINTER DOWN
+   ========================================= */
+
+charm.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        if (
+            event.target ===
+            closeButton
+        ) {
+            return;
+        }
+
+        dragging = true;
+
+        charm.classList.add(
+            "dragging"
+        );
+
+        pointerStartX =
+            event.clientX -
+            currentX;
+
+        pointerStartY =
+            event.clientY -
+            currentY;
+
+        lastX =
+            event.clientX;
+
+        lastY =
+            event.clientY;
+
+        lastTime =
+            performance.now();
+
+        charm.setPointerCapture(
+            event.pointerId
+        );
+
+        message.classList.remove(
+            "show"
+        );
+
+    }
+);
+
+
+/* =========================================
+   POINTER MOVE
+   ========================================= */
+
+charm.addEventListener(
+    "pointermove",
+    function(event) {
+
+        if (!dragging) {
+            return;
+        }
+
+        const now =
+            performance.now();
+
+        const deltaTime =
+            Math.max(
+                1,
+                now - lastTime
+            );
+
+
+        let newX =
+            event.clientX -
+            pointerStartX;
+
+        let newY =
+            event.clientY -
+            pointerStartY;
+
+
+        /* Limit how far user can pull */
+
+        newX =
+            Math.max(
+                -MAX_X,
+                Math.min(
+                    MAX_X,
+                    newX
+                )
+            );
+
+
+        newY =
+            Math.max(
+                -50,
+                Math.min(
+                    MAX_Y,
+                    newY
+                )
+            );
+
+
+        velocityX =
+            (event.clientX -
+                lastX) /
+            deltaTime *
+            16;
+
+        velocityY =
+            (event.clientY -
+                lastY) /
+            deltaTime *
+            16;
+
+
+        currentX =
+            newX;
+
+        currentY =
+            newY;
+
+
+        lastX =
+            event.clientX;
+
+        lastY =
+            event.clientY;
+
+        lastTime =
+            now;
+
+        updateCharm();
+    }
+);
+
+
+/* =========================================
+   RELEASE
+   ========================================= */
+
+charm.addEventListener(
+    "pointerup",
+    releaseCharm
+);
+
+charm.addEventListener(
+    "pointercancel",
+    releaseCharm
+);
+
+
+function releaseCharm() {
+
+    if (!dragging) {
+        return;
+    }
+
+    dragging = false;
+
+    charm.classList.remove(
+        "dragging"
+    );
+
+
+    /*
+        Add extra spring energy
+        when released.
+    */
+
+    velocityX *= 1.25;
+
+    velocityY *= 1.25;
+
+
+    message.classList.add(
+        "show"
+    );
+
+
+    setTimeout(
+        () => {
+            message.classList.remove(
+                "show"
+            );
+        },
+        3000
+    );
+}
+
+
+/* =========================================
+   PHYSICS LOOP
+   ========================================= */
+
+function physics() {
+
+    if (!dragging) {
+
+        /*
+            Spring pulls the charm
+            back toward its original
+            position.
+        */
+
+        velocityX +=
+            -currentX *
+            SPRING;
+
+        velocityY +=
+            -currentY *
+            SPRING;
+
+
+        /*
+            Damping makes the movement
+            gradually settle.
+        */
+
+        velocityX *=
+            DAMPING;
+
+        velocityY *=
+            DAMPING;
+
+
+        currentX +=
+            velocityX;
+
+        currentY +=
+            velocityY;
+
+
+        /*
+            Stop tiny movements.
+        */
+
+        if (
+            Math.abs(currentX) < 0.05 &&
+            Math.abs(velocityX) < 0.05
+        ) {
+
+            currentX = 0;
+            velocityX = 0;
+        }
+
+
+        if (
+            Math.abs(currentY) < 0.05 &&
+            Math.abs(velocityY) < 0.05
+        ) {
+
+            currentY = 0;
+            velocityY = 0;
+        }
+
+
+        updateCharm();
+    }
+
+
+    requestAnimationFrame(
+        physics
+    );
+}
+
+
+/* =========================================
+   VISUAL POSITION
+   ========================================= */
+
+function updateCharm() {
+
+    /*
+        Horizontal movement produces
+        rotation like a hanging object.
+    */
+
+    const rotation =
+        currentX *
+        0.13;
+
+
+    /*
+        Pulling down slightly stretches
+        the visual movement.
+    */
+
+    const scaleY =
+        1 +
+        Math.min(
+            Math.abs(currentY) / 900,
+            0.12
+        );
+
+
+    charm.style.transform =
+        `
+        translate(
+            ${currentX}px,
+            ${currentY}px
+        )
+        rotate(
+            ${rotation}deg
+        )
+        scaleY(
+            ${scaleY}
+        )
+        `;
+}
+
+
+/* =========================================
+   CLOSE
+   ========================================= */
+
+closeButton.addEventListener(
+    "click",
+    function() {
+
+        charm.style.transition =
+            "transform .5s ease, opacity .5s ease";
+
+        charm.style.transform =
+            "translateY(-360px) rotate(-10deg)";
+
+        charm.style.opacity =
+            "0";
+
+        message.classList.remove(
+            "show"
+        );
+    }
+);
+
+
+/* Start physics */
+
+physics();
+
+</script>
+
+</body>
+</html>
