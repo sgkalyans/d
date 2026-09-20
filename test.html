@@ -1137,7 +1137,24 @@ const ROPE_DAMPING = 0.93;
 
 const ROPE_CONSTRAINT_ITERATIONS = 5;
 
-const ROPE_MAX_STRETCH_RATIO = 1.8;
+/*
+    1.8x meant the stretch ceiling was hit
+    by about 65px of pull -- well short of
+    the 140px of drag reach allowed below --
+    so the back half of every drag felt
+    "stuck" doing nothing. 2.7x moves the
+    ceiling out to roughly match the full
+    reach, so pulling further keeps visibly
+    stretching it all the way to the limit
+    instead of maxing out early. Iteration
+    count isn't part of this: mapped pull
+    distance against resulting stretch
+    directly and the response curve was
+    identical whether iterations was 5 or
+    10 -- only this ratio moves the ceiling.
+*/
+
+const ROPE_MAX_STRETCH_RATIO = 2.7;
 
 const ROPE_MAX_DRAG_SPEED = 60;
 
@@ -1559,6 +1576,76 @@ function releaseCharm() {
     charm.classList.remove(
         "dragging"
     );
+
+
+    /*
+        Without this, the bounce-back speed
+        only came from whatever residual
+        motion the dragged point happened to
+        have at the exact instant of release
+        -- which is near zero if the pointer
+        paused before letting go, regardless
+        of how far it had been pulled. A real
+        stretched rope snaps back harder the
+        further it's stretched, independent
+        of how fast the hand let go, so add
+        that as an explicit impulse toward
+        rest, scaled by the current
+        displacement. It stacks with (rather
+        than replaces) whatever residual
+        velocity the drag itself already
+        carries, so a fast flick and a far
+        pull both push it harder.
+    */
+
+    const point =
+        ropePoints[ROPE_LAST_INDEX];
+
+    const displacementX =
+        point.x;
+
+    const displacementY =
+        point.y - ROPE_REST_LENGTH;
+
+    const RELEASE_IMPULSE = 0.08;
+
+    let velocityX =
+        (point.x - point.px) -
+        displacementX * RELEASE_IMPULSE;
+
+    let velocityY =
+        (point.y - point.py) -
+        displacementY * RELEASE_IMPULSE;
+
+
+    /*
+        Safety rail: the constraint solver
+        already snaps a stretched segment
+        back forcefully on its own once
+        relaxation resumes correcting it, so
+        this impulse stacks on top of that
+        rather than being the only source of
+        speed. Capping the combined result
+        keeps a maximum-reach release brisk
+        instead of launching it off screen.
+    */
+
+    const RELEASE_MAX_SPEED = 18;
+
+    const releaseSpeed =
+        Math.hypot(velocityX, velocityY);
+
+    if (releaseSpeed > RELEASE_MAX_SPEED) {
+
+        const scale =
+            RELEASE_MAX_SPEED / releaseSpeed;
+
+        velocityX *= scale;
+        velocityY *= scale;
+    }
+
+    point.px = point.x - velocityX;
+    point.py = point.y - velocityY;
 
     wakePhysics();
 }
