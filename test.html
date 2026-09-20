@@ -1083,6 +1083,50 @@ let lastTime = 0;
 
 
 /* =========================================
+   FIXED TIMESTEP + SLEEP
+
+   The spring constants below are tuned
+   for a 60 fps step. Advancing physics in
+   fixed slices (instead of once per
+   requestAnimationFrame) keeps the bounce
+   feeling identical on a 60 Hz and a
+   120 Hz+ display. The loop also stops
+   rescheduling itself once the charm is
+   fully at rest, instead of running
+   requestAnimationFrame forever for a
+   charm that isn't moving.
+   ========================================= */
+
+let physicsLoopRunning = false;
+
+let lastPhysicsTime = 0;
+
+let physicsAccumulator = 0;
+
+const FIXED_TIMESTEP = 1 / 60;
+
+const MAX_FRAME_DELTA = 0.25;
+
+function wakePhysics() {
+
+    if (physicsLoopRunning) {
+        return;
+    }
+
+    physicsLoopRunning = true;
+
+    lastPhysicsTime =
+        performance.now();
+
+    physicsAccumulator = 0;
+
+    requestAnimationFrame(
+        physics
+    );
+}
+
+
+/* =========================================
    RESPONSIVE SCALE
 
    Applied inside updateCharm() so it
@@ -1131,7 +1175,7 @@ const DAMPING =
 /* Maximum movement */
 
 const MAX_X =
-    140;
+    200;
 
 const MAX_Y =
     180;
@@ -1299,6 +1343,8 @@ function releaseCharm() {
     velocityX *= 1.25;
 
     velocityY *= 1.25;
+
+    wakePhysics();
 }
 
 
@@ -1306,69 +1352,115 @@ function releaseCharm() {
    PHYSICS LOOP
    ========================================= */
 
-function physics() {
+function stepPhysics() {
 
-    if (!dragging) {
+    /*
+        Spring pulls the charm
+        back toward its original
+        position.
+    */
+
+    velocityX +=
+        -currentX *
+        SPRING;
+
+    velocityY +=
+        -currentY *
+        SPRING;
+
+
+    /*
+        Damping makes the movement
+        gradually settle.
+    */
+
+    velocityX *=
+        DAMPING;
+
+    velocityY *=
+        DAMPING;
+
+
+    currentX +=
+        velocityX;
+
+    currentY +=
+        velocityY;
+
+
+    /*
+        Stop tiny movements.
+    */
+
+    if (
+        Math.abs(currentX) < 0.05 &&
+        Math.abs(velocityX) < 0.05
+    ) {
+
+        currentX = 0;
+        velocityX = 0;
+    }
+
+
+    if (
+        Math.abs(currentY) < 0.05 &&
+        Math.abs(velocityY) < 0.05
+    ) {
+
+        currentY = 0;
+        velocityY = 0;
+    }
+}
+
+function physics(now) {
+
+    if (dragging) {
 
         /*
-            Spring pulls the charm
-            back toward its original
-            position.
+            pointermove already renders the
+            drag directly -- nothing for this
+            loop to do until it's released.
         */
 
-        velocityX +=
-            -currentX *
-            SPRING;
+        physicsLoopRunning = false;
+        return;
+    }
 
-        velocityY +=
-            -currentY *
-            SPRING;
+    const frameDelta =
+        Math.min(
+            (now - lastPhysicsTime) / 1000,
+            MAX_FRAME_DELTA
+        );
 
+    lastPhysicsTime = now;
 
-        /*
-            Damping makes the movement
-            gradually settle.
-        */
+    physicsAccumulator +=
+        frameDelta;
 
-        velocityX *=
-            DAMPING;
+    while (
+        physicsAccumulator >=
+        FIXED_TIMESTEP
+    ) {
 
-        velocityY *=
-            DAMPING;
+        stepPhysics();
 
+        physicsAccumulator -=
+            FIXED_TIMESTEP;
+    }
 
-        currentX +=
-            velocityX;
-
-        currentY +=
-            velocityY;
-
-
-        /*
-            Stop tiny movements.
-        */
-
-        if (
-            Math.abs(currentX) < 0.05 &&
-            Math.abs(velocityX) < 0.05
-        ) {
-
-            currentX = 0;
-            velocityX = 0;
-        }
+    updateCharm();
 
 
-        if (
-            Math.abs(currentY) < 0.05 &&
-            Math.abs(velocityY) < 0.05
-        ) {
+    const settled =
+        currentX === 0 &&
+        currentY === 0 &&
+        velocityX === 0 &&
+        velocityY === 0;
 
-            currentY = 0;
-            velocityY = 0;
-        }
+    if (settled) {
 
-
-        updateCharm();
+        physicsLoopRunning = false;
+        return;
     }
 
 
@@ -1454,7 +1546,18 @@ function updateCharm() {
 
 /* Start physics */
 
-physics();
+/*
+    A small starting offset so the charm
+    visibly swings into place on load
+    instead of sitting static until
+    touched.
+*/
+
+currentX = -70;
+
+updateCharm();
+
+wakePhysics();
 
 </script>
 
