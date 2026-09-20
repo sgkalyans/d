@@ -291,32 +291,43 @@
             );
     }
 
-    /* Close button */
+    /* Tag */
 
-    .charm-close {
+    .charm-tag {
         position: absolute;
 
-        top: 12px;
-        right: 2px;
+        top: 297px;
+        left: 50%;
 
-        width: 28px;
-        height: 28px;
+        transform: translateX(-50%);
 
-        border: 0;
-        border-radius: 50%;
+        white-space: nowrap;
 
-        background: white;
+        font-family: Georgia, serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .3px;
+
+        color: #7a4a0a;
+
+        background:
+            linear-gradient(
+                90deg,
+                #f3c64e,
+                #e5b842,
+                #f3c64e
+            );
+
+        padding: 3px 10px;
+
+        border-radius: 10px;
+
+        border: 1px solid #9b650d;
 
         box-shadow:
-            0 2px 8px rgba(0,0,0,.18);
+            0 2px 4px rgba(0,0,0,.15);
 
-        color: #17395f;
-
-        font-size: 18px;
-
-        cursor: pointer;
-
-        z-index: 10;
+        pointer-events: none;
     }
 
     /* Mobile */
@@ -980,15 +991,9 @@
 
         <div class="tassel"></div>
 
+        <div class="charm-tag">Keep U Safe</div>
+
     </div>
-
-
-    <button
-        class="charm-close"
-        id="charmClose"
-        aria-label="Close digital charm">
-        ×
-    </button>
 
 
 </div>
@@ -999,11 +1004,6 @@
 const charm =
     document.getElementById(
         "indian-sg-charm"
-    );
-
-const closeButton =
-    document.getElementById(
-        "charmClose"
     );
 
 const rope =
@@ -1102,13 +1102,6 @@ const MAX_Y =
 charm.addEventListener(
     "pointerdown",
     function(event) {
-
-        if (
-            event.target ===
-            closeButton
-        ) {
-            return;
-        }
 
         dragging = true;
 
@@ -1398,26 +1391,6 @@ function updateCharm() {
         )
         `;
 }
-
-
-/* =========================================
-   CLOSE
-   ========================================= */
-
-closeButton.addEventListener(
-    "click",
-    function() {
-
-        charm.style.transition =
-            "transform .5s ease, opacity .5s ease";
-
-        charm.style.transform =
-            `translateY(-360px) rotate(-10deg) scale(${baseScale})`;
-
-        charm.style.opacity =
-            "0";
-    }
-);
 
 
 /* Start physics */
