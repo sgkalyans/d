@@ -400,14 +400,15 @@
             display: none;
         }
 
+        .hero {
+            padding-right: 165px;
+        }
+
         #indian-sg-charm {
             right: 7px;
 
             transform-origin:
                 50% 0;
-
-            transform:
-                scale(.78);
         }
 
         .charm-message {
@@ -562,6 +563,40 @@ let lastX = 0;
 let lastY = 0;
 
 let lastTime = 0;
+
+
+/* =========================================
+   RESPONSIVE SCALE
+
+   Applied inside updateCharm() so it
+   survives the inline transform written
+   on every physics frame (a plain CSS
+   "transform: scale()" on #indian-sg-charm
+   would otherwise get overwritten).
+   ========================================= */
+
+const mobileQuery =
+    window.matchMedia(
+        "(max-width: 600px)"
+    );
+
+let baseScale =
+    mobileQuery.matches ?
+        0.78 :
+        1;
+
+mobileQuery.addEventListener(
+    "change",
+    function(event) {
+
+        baseScale =
+            event.matches ?
+                0.78 :
+                1;
+
+        updateCharm();
+    }
+);
 
 
 /* Spring strength */
@@ -893,6 +928,9 @@ function updateCharm() {
         scaleY(
             ${scaleY}
         )
+        scale(
+            ${baseScale}
+        )
         `;
 }
 
@@ -909,7 +947,7 @@ closeButton.addEventListener(
             "transform .5s ease, opacity .5s ease";
 
         charm.style.transform =
-            "translateY(-360px) rotate(-10deg)";
+            `translateY(-360px) rotate(-10deg) scale(${baseScale})`;
 
         charm.style.opacity =
             "0";
