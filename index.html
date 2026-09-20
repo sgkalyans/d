@@ -49,10 +49,405 @@
   ></script>
 
   <style>
+    /*
+        The charm's rope is drawn in an SVG
+        sized wider than its own visible area
+        so the swinging cord can paint outside
+        its resting box (needed for the curved
+        rope physics). #indian-sg-charm is
+        position:absolute with no positioned
+        ancestor, so its containing block is
+        the root element, not body -- that
+        overflow was being counted as part of
+        the *html* element's own scrollable
+        width, which grew and shrank every
+        animation frame as the rope swung,
+        appearing as the whole page flickering
+        /shaking rather than just the charm.
+        The rope doesn't need horizontal
+        scroll to be visible, so clipping it
+        here is safe. Set on both html and
+        body: browsers use body's overflow
+        (not html's) to decide the viewport's
+        own scroll behaviour whenever body
+        sets one at all, so html-only left
+        the page still horizontally
+        scrollable by exactly the overflow
+        amount.
+    */
+    html {
+      overflow-x: hidden;
+    }
+
     body {
       font-family: Arial, sans-serif;
+      overflow-x: hidden;
+
+      /*
+          Also makes body (rather than the
+          true document root) the containing
+          block for #indian-sg-charm's
+          position:absolute -- overflow set
+          on the same element that IS the
+          containing block reliably clips it;
+          overflow set on an ancestor further
+          up did not.
+      */
+      position: relative;
+
+      /*
+          Without this, the browser's default
+          body margin (Tailwind's preflight
+          normally zeroes it, but don't rely
+          on that CDN script loading) would
+          now shift the charm's fixed 80px/
+          24px offsets, since body just became
+          its containing block above.
+      */
+      margin: 0;
     }
   </style>
+<style>
+    #indian-sg-charm,
+    #indian-sg-charm * {
+        box-sizing: border-box;
+    }
+
+    /* ==========================================
+       INDIAN.SG DIGITAL CHARM
+       ========================================== */
+
+    #indian-sg-charm {
+        /*
+            Absolute (not fixed) so it scrolls
+            away with the rest of the page
+            instead of floating over content
+            for the whole scroll.
+        */
+        position: absolute;
+        top: 80px;
+        right: 24px;
+
+        width: 155px;
+        height: 330px;
+
+        z-index: 99999;
+
+        touch-action: none;
+
+        user-select: none;
+
+        cursor: grab;
+
+        transform-origin: 50% 0;
+
+        /* Important for smooth physics */
+        will-change: transform;
+    }
+
+    #indian-sg-charm.dragging {
+        cursor: grabbing;
+    }
+
+    /* Rope
+
+       A real simulated cord (see the
+       ROPE PHYSICS section of the script)
+       instead of a straight rotating bar,
+       so it bends into a curve during a
+       swing instead of staying rigid.
+    */
+
+    .charm-rope-svg {
+        position: absolute;
+
+        top: 0;
+        left: 50%;
+
+        /*
+            Matches #indian-sg-charm's own
+            width -- the rope can still swing
+            and paint well beyond this box
+            (overflow:visible + a wider
+            viewBox below handle that), but
+            the element's own *layout*
+            footprint no longer extends past
+            what the charm already occupies.
+            A wider box here was silently
+            widening the whole page's layout
+            geometry every frame as the rope
+            swung, which (a) still triggered
+            a mobile browser's zoom-to-fit
+            even after the overflow:hidden
+            fix on body, since that only
+            clips painting, not layout size,
+            and (b) was the real cause of
+            that page-flicker fix needing to
+            exist at all.
+        */
+        width: 155px;
+        height: 220px;
+
+        transform: translateX(-50%);
+
+        overflow: visible;
+
+        pointer-events: none;
+    }
+
+    /* Pendant
+
+       Everything hanging below the rope
+       (beads, tag, bell, tassel). Kept as
+       its own box so the rope can stretch
+       independently -- JS shifts this down
+       by the same amount instead of
+       squashing the whole charm with a
+       uniform scaleY.
+    */
+
+    .charm-pendant {
+        position: absolute;
+
+        top: 0;
+        left: 0;
+
+        width: 100%;
+        height: 100%;
+
+        /*
+            Pivots around where the rope's
+            last simulated point attaches
+            (82px down -- the rope's rest
+            length), not the pendant box's
+            own top edge.
+        */
+        transform-origin: 50% 82px;
+    }
+
+    /* Dangle
+
+       Bell + tassel + tag, split out so
+       they can lag a beat behind the rest
+       of the swing (secondary motion) --
+       JS rotates this around the point
+       where it hangs off the lower bead,
+       not the charm's own top.
+    */
+
+    .charm-dangle {
+        position: absolute;
+
+        top: 0;
+        left: 0;
+
+        width: 100%;
+        height: 100%;
+
+        transform-origin: 50% 256px;
+    }
+
+    /* Top bead */
+
+    .charm-bead {
+        position: absolute;
+
+        left: 50%;
+
+        transform: translateX(-50%);
+
+        border-radius: 50%;
+
+        box-shadow:
+            inset 2px 2px 4px rgba(255,255,255,.35),
+            2px 3px 5px rgba(0,0,0,.18);
+    }
+
+    .red-bead {
+        top: 72px;
+
+        width: 18px;
+        height: 18px;
+
+        background: #d51f25;
+    }
+
+    .black-bead {
+        top: 90px;
+
+        width: 17px;
+        height: 17px;
+
+        background: #151515;
+    }
+
+    /* ==========================================
+       BOMMAI IMAGE
+       ========================================== */
+
+    .bommai {
+        position: absolute;
+
+        top: 96px;
+        left: 50%;
+
+        width: 135px;
+        height: 135px;
+
+        transform: translateX(-50%);
+
+        object-fit: contain;
+
+        pointer-events: none;
+
+        filter:
+            drop-shadow(0 8px 7px rgba(0,0,0,.22));
+    }
+
+    /* Lower beads */
+
+    .lower-black {
+        top: 222px;
+
+        width: 15px;
+        height: 15px;
+
+        background: #151515;
+    }
+
+    .lower-red {
+        top: 237px;
+
+        width: 18px;
+        height: 18px;
+
+        background: #d51f25;
+    }
+
+    /* Bell */
+
+    .bell {
+        position: absolute;
+
+        top: 256px;
+        left: 50%;
+
+        width: 34px;
+        height: 27px;
+
+        transform: translateX(-50%);
+
+        border-radius:
+            5px 5px 14px 14px;
+
+        background:
+            linear-gradient(
+                90deg,
+                #9c650c,
+                #f3c64e,
+                #9c650c
+            );
+
+        border: 2px solid #9b650d;
+
+        box-shadow:
+            0 4px 6px rgba(0,0,0,.2);
+    }
+
+    .bell::after {
+        content: "";
+
+        position: absolute;
+
+        bottom: -7px;
+        left: 12px;
+
+        width: 7px;
+        height: 7px;
+
+        border-radius: 50%;
+
+        background: #87540b;
+    }
+
+    /* Tassel */
+
+    .tassel {
+        position: absolute;
+
+        top: 285px;
+        left: 50%;
+
+        width: 32px;
+        height: 18px;
+
+        transform:
+            translateX(-50%);
+
+        border-radius:
+            0 0 12px 12px;
+
+        background:
+            repeating-linear-gradient(
+                90deg,
+                #c72026 0px,
+                #c72026 4px,
+                #ef4949 4px,
+                #ef4949 8px
+            );
+    }
+
+    /* Tag */
+
+    .charm-tag {
+        position: absolute;
+
+        top: 297px;
+        left: 50%;
+
+        transform: translateX(-50%);
+
+        white-space: nowrap;
+
+        font-family: Georgia, serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .3px;
+
+        color: #7a4a0a;
+
+        background:
+            linear-gradient(
+                90deg,
+                #f3c64e,
+                #e5b842,
+                #f3c64e
+            );
+
+        padding: 3px 10px;
+
+        border-radius: 10px;
+
+        border: 1px solid #9b650d;
+
+        box-shadow:
+            0 2px 4px rgba(0,0,0,.15);
+
+        pointer-events: none;
+    }
+
+    /* Mobile */
+
+    @media (max-width: 600px) {
+
+        #indian-sg-charm {
+            right: 7px;
+
+            transform-origin:
+                50% 0;
+        }
+    }
+</style>
 </head>
 
 <body class="bg-white text-gray-800">
@@ -665,6 +1060,826 @@
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
+
+
+<!-- =========================================
+     DIGITAL CHARM
+     ========================================= -->
+
+<div id="indian-sg-charm">
+
+    <svg
+        class="charm-rope-svg"
+        id="charmRopeSvg"
+        viewBox="-77.5 0 155 220"
+        width="155"
+        height="220"
+    >
+
+        <defs>
+            <linearGradient
+                id="charmRopeGradient"
+                x1="0" y1="0" x2="0" y2="1"
+            >
+                <stop offset="0%" stop-color="#e5b842" />
+                <stop offset="50%" stop-color="#9b6514" />
+                <stop offset="100%" stop-color="#e5b842" />
+            </linearGradient>
+        </defs>
+
+        <path
+            id="charmRopePath"
+            fill="none"
+            stroke="url(#charmRopeGradient)"
+            stroke-width="6"
+            stroke-linecap="round"
+        />
+
+    </svg>
+
+    <div class="charm-pendant" id="charmPendant">
+
+        <div class="charm-bead red-bead"></div>
+
+        <div class="charm-bead black-bead"></div>
+
+
+        <img
+            class="bommai"
+            src="indian-sg-drishti-bommai.png"
+            alt="Indian.SG Digital Charm"
+        >
+
+
+        <div
+            class="charm-bead lower-black">
+        </div>
+
+        <div
+            class="charm-bead lower-red">
+        </div>
+
+
+        <div class="charm-dangle" id="charmDangle">
+
+            <div class="bell"></div>
+
+            <div class="tassel"></div>
+
+            <div class="charm-tag">Keep U Safe</div>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+const charm =
+    document.getElementById(
+        "indian-sg-charm"
+    );
+
+const ropePath =
+    document.getElementById(
+        "charmRopePath"
+    );
+
+const pendant =
+    document.getElementById(
+        "charmPendant"
+    );
+
+const dangle =
+    document.getElementById(
+        "charmDangle"
+    );
+
+
+/* =========================================
+   ROPE PHYSICS
+
+   A short Verlet-integrated chain instead
+   of one rigid rotating bar: gravity pulls
+   each point down, distance constraints
+   pull segments back toward their rest
+   length, and the whole chain is relaxed
+   several times a step so a pull at one
+   end reaches the other within the same
+   frame. This is a small version of the
+   technique behind Hangly's rope solver --
+   position-based constraints rather than
+   per-segment springs, so it settles
+   instead of resonating forever.
+   ========================================= */
+
+const ROPE_POINT_COUNT = 6;
+
+const ROPE_LAST_INDEX =
+    ROPE_POINT_COUNT - 1;
+
+const ROPE_SEGMENT_COUNT =
+    ROPE_POINT_COUNT - 1;
+
+const ROPE_REST_LENGTH = 82;
+
+const ROPE_SEGMENT_LENGTH =
+    ROPE_REST_LENGTH / ROPE_SEGMENT_COUNT;
+
+const ROPE_GRAVITY = 1800;
+
+const ROPE_DAMPING = 0.93;
+
+/*
+    Iteration count doubles as a stiffness
+    dial for position-based dynamics like
+    this: with fewer passes, tension from a
+    drag doesn't fully resolve within a
+    step, so it distributes as elastic give
+    across every segment instead of being
+    held taut everywhere except the one
+    link nearest the cursor. It barely
+    affects the passive swing (gravity's
+    pull each step is tiny and corrects
+    easily either way) -- simulated both
+    before picking this, settle time and
+    bounce count were the same from 4 to 20
+    passes.
+*/
+
+const ROPE_CONSTRAINT_ITERATIONS = 5;
+
+/*
+    1.8x meant the stretch ceiling was hit
+    by about 65px of pull -- well short of
+    the 140px of drag reach allowed below --
+    so the back half of every drag felt
+    "stuck" doing nothing. 2.7x moves the
+    ceiling out to roughly match the full
+    reach, so pulling further keeps visibly
+    stretching it all the way to the limit
+    instead of maxing out early. Iteration
+    count isn't part of this: mapped pull
+    distance against resulting stretch
+    directly and the response curve was
+    identical whether iterations was 5 or
+    10 -- only this ratio moves the ceiling.
+*/
+
+const ROPE_MAX_STRETCH_RATIO = 2.7;
+
+const ROPE_MAX_DRAG_SPEED = 60;
+
+const ROPE_MAX_REACH_X = 130;
+
+const ROPE_MAX_REACH_Y_UP = -30;
+
+const ROPE_MAX_REACH_Y_DOWN = 140;
+
+/*
+    Each point tracks its current position
+    (x, y) and previous position (px, py).
+    Verlet infers velocity from the gap
+    between them instead of a separate
+    velocity variable, so a constraint
+    correction automatically carries into
+    next step's motion.
+*/
+
+const ropePoints = [];
+
+for (let i = 0; i < ROPE_POINT_COUNT; i++) {
+
+    const y = i * ROPE_SEGMENT_LENGTH;
+
+    ropePoints.push({ x: 0, y: y, px: 0, py: y });
+}
+
+
+function integrateRopePoints() {
+
+    for (let i = 1; i < ROPE_POINT_COUNT; i++) {
+
+        if (dragging && i === ROPE_LAST_INDEX) {
+            continue;
+        }
+
+        const point = ropePoints[i];
+
+        const velocityX =
+            (point.x - point.px) * ROPE_DAMPING;
+
+        const velocityY =
+            (point.y - point.py) * ROPE_DAMPING;
+
+        const nextX = point.x + velocityX;
+
+        const nextY =
+            point.y + velocityY +
+            ROPE_GRAVITY * FIXED_TIMESTEP * FIXED_TIMESTEP;
+
+        point.px = point.x;
+        point.py = point.y;
+        point.x = nextX;
+        point.y = nextY;
+    }
+}
+
+
+function driveDraggedRopePoint() {
+
+    if (!dragging) {
+        return;
+    }
+
+    const point = ropePoints[ROPE_LAST_INDEX];
+
+    const dx = dragTargetX - point.x;
+    const dy = dragTargetY - point.y;
+
+    const distance = Math.hypot(dx, dy);
+
+    point.px = point.x;
+    point.py = point.y;
+
+    if (distance > 0.001) {
+
+        const step =
+            Math.min(distance, ROPE_MAX_DRAG_SPEED);
+
+        point.x += (dx / distance) * step;
+        point.y += (dy / distance) * step;
+    }
+}
+
+
+function relaxRopeConstraints() {
+
+    for (
+        let pass = 0;
+        pass < ROPE_CONSTRAINT_ITERATIONS;
+        pass++
+    ) {
+
+        for (let i = 0; i < ROPE_SEGMENT_COUNT; i++) {
+
+            const a = ropePoints[i];
+            const b = ropePoints[i + 1];
+
+            const dx = b.x - a.x;
+            const dy = b.y - a.y;
+
+            const distance =
+                Math.hypot(dx, dy) || 0.0001;
+
+            const diff =
+                (distance - ROPE_SEGMENT_LENGTH) / distance;
+
+            const aFixed = i === 0;
+
+            const bFixed =
+                dragging && i + 1 === ROPE_LAST_INDEX;
+
+            if (aFixed && bFixed) {
+                continue;
+            }
+
+            if (aFixed) {
+                b.x -= dx * diff;
+                b.y -= dy * diff;
+            } else if (bFixed) {
+                a.x += dx * diff;
+                a.y += dy * diff;
+            } else {
+                a.x += dx * diff * 0.5;
+                a.y += dy * diff * 0.5;
+                b.x -= dx * diff * 0.5;
+                b.y -= dy * diff * 0.5;
+            }
+        }
+    }
+}
+
+
+function clampRopeStretch() {
+
+    const maxLength =
+        ROPE_SEGMENT_LENGTH * ROPE_MAX_STRETCH_RATIO;
+
+    for (let i = 0; i < ROPE_SEGMENT_COUNT; i++) {
+
+        const a = ropePoints[i];
+        const b = ropePoints[i + 1];
+
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+
+        const distance =
+            Math.hypot(dx, dy) || 0.0001;
+
+        if (distance > maxLength) {
+
+            const scale = maxLength / distance;
+
+            b.x = a.x + dx * scale;
+            b.y = a.y + dy * scale;
+        }
+    }
+}
+
+
+/*
+    A rope mid-swing crosses through zero
+    velocity at every peak and trough, not
+    just at true rest -- checking speed for
+    a single step would sleep the loop at
+    the first such crossing, freezing the
+    rope mid-oscillation. Requiring the low
+    -speed condition to hold for many
+    consecutive fixed steps (not just one)
+    tells a real settle apart from a
+    momentary turning point, the same way
+    Hangly's own FramesBeforeSleep does.
+*/
+
+let stillStepCount = 0;
+
+const FRAMES_BEFORE_SLEEP = 20;
+
+function isChainStillThisStep() {
+
+    for (let i = 1; i < ROPE_POINT_COUNT; i++) {
+
+        const point = ropePoints[i];
+
+        const speed =
+            Math.hypot(
+                point.x - point.px,
+                point.y - point.py
+            );
+
+        if (speed > 0.02) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function stepRope() {
+
+    ropePoints[0].x = 0;
+    ropePoints[0].y = 0;
+    ropePoints[0].px = 0;
+    ropePoints[0].py = 0;
+
+    integrateRopePoints();
+    driveDraggedRopePoint();
+    relaxRopeConstraints();
+    clampRopeStretch();
+
+    if (dragging || !isChainStillThisStep()) {
+        stillStepCount = 0;
+    } else {
+        stillStepCount += 1;
+    }
+}
+
+
+/* =========================================
+   PHYSICS STATE
+   ========================================= */
+
+let dragging = false;
+
+let pointerStartX = 0;
+let pointerStartY = 0;
+
+let dragTargetX = 0;
+let dragTargetY = ROPE_REST_LENGTH;
+
+/*
+    Secondary motion: the bell/tassel/tag
+    trail a beat behind the mask's own
+    angle instead of moving as one rigid
+    body with it.
+*/
+
+let dangleRotation = 0;
+
+const DANGLE_LAG = 0.18;
+
+
+/* =========================================
+   FIXED TIMESTEP + SLEEP
+
+   The rope constants above are tuned for
+   a 60 fps step. Advancing physics in
+   fixed slices (instead of once per
+   requestAnimationFrame) keeps it feeling
+   identical on a 60 Hz and a 120 Hz+
+   display. The loop also stops
+   rescheduling itself once the rope is
+   fully at rest, instead of running
+   requestAnimationFrame forever for a
+   charm that isn't moving.
+   ========================================= */
+
+let physicsLoopRunning = false;
+
+let lastPhysicsTime = 0;
+
+let physicsAccumulator = 0;
+
+const FIXED_TIMESTEP = 1 / 60;
+
+const MAX_FRAME_DELTA = 0.25;
+
+function wakePhysics() {
+
+    if (physicsLoopRunning) {
+        return;
+    }
+
+    physicsLoopRunning = true;
+
+    lastPhysicsTime =
+        performance.now();
+
+    physicsAccumulator = 0;
+
+    requestAnimationFrame(
+        physics
+    );
+}
+
+
+/* =========================================
+   RESPONSIVE SCALE
+
+   Applied inside updateCharm() so it
+   survives the inline transform written
+   on every physics frame (a plain CSS
+   "transform: scale()" on #indian-sg-charm
+   would otherwise get overwritten).
+   ========================================= */
+
+const mobileQuery =
+    window.matchMedia(
+        "(max-width: 600px)"
+    );
+
+let baseScale =
+    mobileQuery.matches ?
+        0.78 :
+        1;
+
+mobileQuery.addEventListener(
+    "change",
+    function(event) {
+
+        baseScale =
+            event.matches ?
+                0.78 :
+                1;
+
+        updateCharm();
+    }
+);
+
+
+/* =========================================
+   POINTER DOWN
+   ========================================= */
+
+charm.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        dragging = true;
+
+        charm.classList.add(
+            "dragging"
+        );
+
+        const point =
+            ropePoints[ROPE_LAST_INDEX];
+
+        pointerStartX =
+            event.clientX - point.x;
+
+        pointerStartY =
+            event.clientY - point.y;
+
+        charm.setPointerCapture(
+            event.pointerId
+        );
+
+        wakePhysics();
+    }
+);
+
+
+/* =========================================
+   POINTER MOVE
+   ========================================= */
+
+charm.addEventListener(
+    "pointermove",
+    function(event) {
+
+        if (!dragging) {
+            return;
+        }
+
+        let newTargetX =
+            event.clientX - pointerStartX;
+
+        let newTargetY =
+            event.clientY - pointerStartY;
+
+
+        /* Limit how far the user can pull */
+
+        newTargetX =
+            Math.max(
+                -ROPE_MAX_REACH_X,
+                Math.min(ROPE_MAX_REACH_X, newTargetX)
+            );
+
+        newTargetY =
+            Math.max(
+                ROPE_REST_LENGTH + ROPE_MAX_REACH_Y_UP,
+                Math.min(
+                    ROPE_REST_LENGTH + ROPE_MAX_REACH_Y_DOWN,
+                    newTargetY
+                )
+            );
+
+        dragTargetX = newTargetX;
+        dragTargetY = newTargetY;
+    }
+);
+
+
+/* =========================================
+   RELEASE
+   ========================================= */
+
+charm.addEventListener(
+    "pointerup",
+    releaseCharm
+);
+
+charm.addEventListener(
+    "pointercancel",
+    releaseCharm
+);
+
+
+function releaseCharm() {
+
+    if (!dragging) {
+        return;
+    }
+
+    dragging = false;
+
+    charm.classList.remove(
+        "dragging"
+    );
+
+
+    /*
+        Without this, the bounce-back speed
+        only came from whatever residual
+        motion the dragged point happened to
+        have at the exact instant of release
+        -- which is near zero if the pointer
+        paused before letting go, regardless
+        of how far it had been pulled. A real
+        stretched rope snaps back harder the
+        further it's stretched, independent
+        of how fast the hand let go, so add
+        that as an explicit impulse toward
+        rest, scaled by the current
+        displacement. It stacks with (rather
+        than replaces) whatever residual
+        velocity the drag itself already
+        carries, so a fast flick and a far
+        pull both push it harder.
+    */
+
+    const point =
+        ropePoints[ROPE_LAST_INDEX];
+
+    const displacementX =
+        point.x;
+
+    const displacementY =
+        point.y - ROPE_REST_LENGTH;
+
+    const RELEASE_IMPULSE = 0.08;
+
+    let velocityX =
+        (point.x - point.px) -
+        displacementX * RELEASE_IMPULSE;
+
+    let velocityY =
+        (point.y - point.py) -
+        displacementY * RELEASE_IMPULSE;
+
+
+    /*
+        Safety rail: the constraint solver
+        already snaps a stretched segment
+        back forcefully on its own once
+        relaxation resumes correcting it, so
+        this impulse stacks on top of that
+        rather than being the only source of
+        speed. Capping the combined result
+        keeps a maximum-reach release brisk
+        instead of launching it off screen.
+    */
+
+    const RELEASE_MAX_SPEED = 18;
+
+    const releaseSpeed =
+        Math.hypot(velocityX, velocityY);
+
+    if (releaseSpeed > RELEASE_MAX_SPEED) {
+
+        const scale =
+            RELEASE_MAX_SPEED / releaseSpeed;
+
+        velocityX *= scale;
+        velocityY *= scale;
+    }
+
+    point.px = point.x - velocityX;
+    point.py = point.y - velocityY;
+
+    wakePhysics();
+}
+
+
+/* =========================================
+   PHYSICS LOOP
+   ========================================= */
+
+function physics(now) {
+
+    const frameDelta =
+        Math.min(
+            (now - lastPhysicsTime) / 1000,
+            MAX_FRAME_DELTA
+        );
+
+    lastPhysicsTime = now;
+
+    physicsAccumulator += frameDelta;
+
+    while (physicsAccumulator >= FIXED_TIMESTEP) {
+
+        stepRope();
+
+        physicsAccumulator -= FIXED_TIMESTEP;
+    }
+
+    updateCharm();
+
+    if (!dragging && stillStepCount >= FRAMES_BEFORE_SLEEP) {
+
+        physicsLoopRunning = false;
+        return;
+    }
+
+    requestAnimationFrame(
+        physics
+    );
+}
+
+
+/* =========================================
+   VISUAL POSITION
+   ========================================= */
+
+function buildRopePath() {
+
+    let d = `M ${ropePoints[0].x} ${ropePoints[0].y}`;
+
+    for (let i = 1; i < ROPE_LAST_INDEX; i++) {
+
+        const current = ropePoints[i];
+        const next = ropePoints[i + 1];
+
+        const midX = (current.x + next.x) / 2;
+        const midY = (current.y + next.y) / 2;
+
+        d += ` Q ${current.x} ${current.y} ${midX} ${midY}`;
+    }
+
+    const secondLast = ropePoints[ROPE_LAST_INDEX - 1];
+    const last = ropePoints[ROPE_LAST_INDEX];
+
+    d += ` Q ${secondLast.x} ${secondLast.y} ${last.x} ${last.y}`;
+
+    return d;
+}
+
+function updateCharm() {
+
+    ropePath.setAttribute(
+        "d",
+        buildRopePath()
+    );
+
+
+    /*
+        The pendant hangs from the rope's
+        last simulated point and orients
+        along that final segment, instead
+        of rotating as an abstract rigid
+        body -- see the comment on
+        .charm-pendant's transform-origin
+        for why translate/rotate combine
+        the way they do here.
+    */
+
+    const last = ropePoints[ROPE_LAST_INDEX];
+    const secondLast = ropePoints[ROPE_LAST_INDEX - 1];
+
+    const segmentDx = last.x - secondLast.x;
+    const segmentDy = last.y - secondLast.y;
+
+    const pendantAngle =
+        Math.atan2(-segmentDx, segmentDy) *
+        (180 / Math.PI);
+
+    pendant.style.transform =
+        `translate(${last.x}px, ${last.y - ROPE_REST_LENGTH}px) rotate(${pendantAngle}deg)`;
+
+
+    /*
+        The dangle (bell/tassel/tag) eases
+        toward the pendant's own angle
+        instead of snapping to it, so it
+        trails a beat behind -- secondary
+        motion, like a loose hinge rather
+        than one solid piece.
+    */
+
+    dangleRotation +=
+        (pendantAngle - dangleRotation) *
+        DANGLE_LAG;
+
+    dangle.style.transform =
+        `rotate(${dangleRotation - pendantAngle}deg)`;
+
+
+    charm.style.transform =
+        `scale(${baseScale})`;
+}
+
+
+/* Start physics */
+
+/*
+    Seed the whole chain at a small angle
+    (not just the last point) so it swings
+    into its resting position on load
+    instead of sitting static until
+    touched. Displacing every point keeps
+    the initial pose geometrically valid,
+    so the constraint solver doesn't have
+    to fight a huge violation on frame one.
+*/
+
+(function seedInitialSwing() {
+
+    const angle = (22 * Math.PI) / 180;
+
+    for (let i = 1; i < ROPE_POINT_COUNT; i++) {
+
+        const length = i * ROPE_SEGMENT_LENGTH;
+        const x = length * Math.sin(angle);
+        const y = length * Math.cos(angle);
+
+        ropePoints[i].x = x;
+        ropePoints[i].y = y;
+        ropePoints[i].px = x;
+        ropePoints[i].py = y;
+    }
+})();
+
+updateCharm();
+
+wakePhysics();
+
+</script>
 
 </body>
 </html>
