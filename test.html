@@ -164,7 +164,28 @@
         top: 0;
         left: 50%;
 
-        width: 280px;
+        /*
+            Matches #indian-sg-charm's own
+            width -- the rope can still swing
+            and paint well beyond this box
+            (overflow:visible + a wider
+            viewBox below handle that), but
+            the element's own *layout*
+            footprint no longer extends past
+            what the charm already occupies.
+            A wider box here was silently
+            widening the whole page's layout
+            geometry every frame as the rope
+            swung, which (a) still triggered
+            a mobile browser's zoom-to-fit
+            even after the overflow:hidden
+            fix on body, since that only
+            clips painting, not layout size,
+            and (b) was the real cause of
+            that page-flicker fix needing to
+            exist at all.
+        */
+        width: 155px;
         height: 220px;
 
         transform: translateX(-50%);
@@ -1050,8 +1071,8 @@
     <svg
         class="charm-rope-svg"
         id="charmRopeSvg"
-        viewBox="-140 0 280 220"
-        width="280"
+        viewBox="-77.5 0 155 220"
+        width="155"
         height="220"
     >
 
