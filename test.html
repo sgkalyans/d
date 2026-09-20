@@ -124,6 +124,27 @@
             );
     }
 
+    /* Pendant
+
+       Everything hanging below the rope
+       (beads, tag, bell, tassel). Kept as
+       its own box so the rope can stretch
+       independently -- JS shifts this down
+       by the same amount instead of
+       squashing the whole charm with a
+       uniform scaleY.
+    */
+
+    .charm-pendant {
+        position: absolute;
+
+        top: 0;
+        left: 0;
+
+        width: 100%;
+        height: 100%;
+    }
+
     /* Top bead */
 
     .charm-bead {
@@ -175,8 +196,6 @@
 
         object-fit: contain;
 
-        border-radius: 22%;
-
         pointer-events: none;
 
         filter:
@@ -186,7 +205,7 @@
     /* Lower beads */
 
     .lower-black {
-        top: 236px;
+        top: 222px;
 
         width: 15px;
         height: 15px;
@@ -195,7 +214,7 @@
     }
 
     .lower-red {
-        top: 251px;
+        top: 237px;
 
         width: 18px;
         height: 18px;
@@ -208,7 +227,7 @@
     .bell {
         position: absolute;
 
-        top: 270px;
+        top: 256px;
         left: 50%;
 
         width: 34px;
@@ -254,7 +273,7 @@
     .tassel {
         position: absolute;
 
-        top: 299px;
+        top: 285px;
         left: 50%;
 
         width: 32px;
@@ -302,63 +321,6 @@
         cursor: pointer;
 
         z-index: 10;
-    }
-
-    /* Message */
-
-    .charm-message {
-        position: absolute;
-
-        right: 145px;
-        top: 125px;
-
-        width: 235px;
-
-        padding: 16px 18px;
-
-        background: #fffdf8;
-
-        border:
-            1px solid #eadfc9;
-
-        border-radius: 15px;
-
-        box-shadow:
-            0 8px 25px rgba(0,0,0,.12);
-
-        opacity: 0;
-
-        transform:
-            translateX(10px)
-            scale(.96);
-
-        pointer-events: none;
-
-        transition:
-            opacity .25s ease,
-            transform .25s ease;
-    }
-
-    .charm-message.show {
-        opacity: 1;
-
-        transform:
-            translateX(0)
-            scale(1);
-    }
-
-    .charm-message strong {
-        display: block;
-
-        font-size: 14px;
-
-        margin-bottom: 5px;
-    }
-
-    .charm-message span {
-        font-size: 12px;
-
-        color: #68778a;
     }
 
     /* Instructions */
@@ -411,14 +373,6 @@
                 50% 0;
         }
 
-        .charm-message {
-            right: 105px;
-
-            width: 190px;
-
-            top: 115px;
-        }
-
         .instructions {
             width: 90%;
 
@@ -467,32 +421,36 @@
 
 <div id="indian-sg-charm">
 
-    <div class="charm-rope"></div>
+    <div class="charm-rope" id="charmRope"></div>
 
-    <div class="charm-bead red-bead"></div>
+    <div class="charm-pendant" id="charmPendant">
 
-    <div class="charm-bead black-bead"></div>
+        <div class="charm-bead red-bead"></div>
 
-
-    <img
-        class="bommai"
-        src="indian-sg-drishti-bommai.png"
-        alt="Indian.SG Digital Charm"
-    >
+        <div class="charm-bead black-bead"></div>
 
 
-    <div
-        class="charm-bead lower-black">
+        <img
+            class="bommai"
+            src="indian-sg-drishti-bommai.png"
+            alt="Indian.SG Digital Charm"
+        >
+
+
+        <div
+            class="charm-bead lower-black">
+        </div>
+
+        <div
+            class="charm-bead lower-red">
+        </div>
+
+
+        <div class="bell"></div>
+
+        <div class="tassel"></div>
+
     </div>
-
-    <div
-        class="charm-bead lower-red">
-    </div>
-
-
-    <div class="bell"></div>
-
-    <div class="tassel"></div>
 
 
     <button
@@ -502,21 +460,6 @@
         ×
     </button>
 
-
-    <div
-        class="charm-message"
-        id="charmMessage">
-
-        <strong>
-            A little piece of culture,
-            wherever you are.
-        </strong>
-
-        <span>
-            Indian.SG Digital Charm
-        </span>
-
-    </div>
 
 </div>
 
@@ -533,15 +476,22 @@ const charm =
         "indian-sg-charm"
     );
 
-const message =
-    document.getElementById(
-        "charmMessage"
-    );
-
 const closeButton =
     document.getElementById(
         "charmClose"
     );
+
+const rope =
+    document.getElementById(
+        "charmRope"
+    );
+
+const pendant =
+    document.getElementById(
+        "charmPendant"
+    );
+
+const ROPE_REST_HEIGHT = 82;
 
 
 /* =========================================
@@ -660,10 +610,6 @@ charm.addEventListener(
 
         charm.setPointerCapture(
             event.pointerId
-        );
-
-        message.classList.remove(
-            "show"
         );
 
     }
@@ -793,21 +739,6 @@ function releaseCharm() {
     velocityX *= 1.25;
 
     velocityY *= 1.25;
-
-
-    message.classList.add(
-        "show"
-    );
-
-
-    setTimeout(
-        () => {
-            message.classList.remove(
-                "show"
-            );
-        },
-        3000
-    );
 }
 
 
@@ -896,33 +827,46 @@ function updateCharm() {
     /*
         Horizontal movement produces
         rotation like a hanging object.
+
+        Negated because CSS rotate() is
+        clockwise-positive: swinging the
+        bottom of something hanging from
+        a fixed top point *left* is a
+        counter-clockwise (negative)
+        rotation, the opposite sign of
+        the pointer's own movement.
     */
 
     const rotation =
-        currentX *
+        -currentX *
         0.13;
 
 
     /*
-        Pulling down slightly stretches
-        the visual movement.
+        Pulling down stretches the rope
+        itself -- like elastic -- while
+        the pendant (tag/bell/tassel)
+        keeps its own shape and just
+        hangs lower by the same amount.
     */
 
-    const scaleY =
-        1 +
+    const stretch =
         Math.min(
-            Math.abs(currentY) / 500,
-            0.35
+            Math.max(currentY, 0),
+            60
         );
+
+    rope.style.height =
+        `${ROPE_REST_HEIGHT + stretch}px`;
+
+    pendant.style.transform =
+        `translateY(${stretch}px)`;
 
 
     charm.style.transform =
         `
         rotate(
             ${rotation}deg
-        )
-        scaleY(
-            ${scaleY}
         )
         scale(
             ${baseScale}
@@ -947,10 +891,6 @@ closeButton.addEventListener(
 
         charm.style.opacity =
             "0";
-
-        message.classList.remove(
-            "show"
-        );
     }
 );
 
