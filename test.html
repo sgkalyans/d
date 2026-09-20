@@ -1137,7 +1137,24 @@ const ROPE_DAMPING = 0.93;
 
 const ROPE_CONSTRAINT_ITERATIONS = 5;
 
-const ROPE_MAX_STRETCH_RATIO = 1.8;
+/*
+    1.8x meant the stretch ceiling was hit
+    by about 65px of pull -- well short of
+    the 140px of drag reach allowed below --
+    so the back half of every drag felt
+    "stuck" doing nothing. 2.7x moves the
+    ceiling out to roughly match the full
+    reach, so pulling further keeps visibly
+    stretching it all the way to the limit
+    instead of maxing out early. Iteration
+    count isn't part of this: mapped pull
+    distance against resulting stretch
+    directly and the response curve was
+    identical whether iterations was 5 or
+    10 -- only this ratio moves the ceiling.
+*/
+
+const ROPE_MAX_STRETCH_RATIO = 2.7;
 
 const ROPE_MAX_DRAG_SPEED = 60;
 
