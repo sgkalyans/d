@@ -911,17 +911,13 @@ function updateCharm() {
     const scaleY =
         1 +
         Math.min(
-            Math.abs(currentY) / 900,
-            0.12
+            Math.abs(currentY) / 500,
+            0.35
         );
 
 
     charm.style.transform =
         `
-        translate(
-            ${currentX}px,
-            ${currentY}px
-        )
         rotate(
             ${rotation}deg
         )
