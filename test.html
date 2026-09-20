@@ -325,63 +325,6 @@
         z-index: 10;
     }
 
-    /* Message */
-
-    .charm-message {
-        position: absolute;
-
-        right: 145px;
-        top: 125px;
-
-        width: 235px;
-
-        padding: 16px 18px;
-
-        background: #fffdf8;
-
-        border:
-            1px solid #eadfc9;
-
-        border-radius: 15px;
-
-        box-shadow:
-            0 8px 25px rgba(0,0,0,.12);
-
-        opacity: 0;
-
-        transform:
-            translateX(10px)
-            scale(.96);
-
-        pointer-events: none;
-
-        transition:
-            opacity .25s ease,
-            transform .25s ease;
-    }
-
-    .charm-message.show {
-        opacity: 1;
-
-        transform:
-            translateX(0)
-            scale(1);
-    }
-
-    .charm-message strong {
-        display: block;
-
-        font-size: 14px;
-
-        margin-bottom: 5px;
-    }
-
-    .charm-message span {
-        font-size: 12px;
-
-        color: #68778a;
-    }
-
     /* Instructions */
 
     .instructions {
@@ -430,14 +373,6 @@
 
             transform-origin:
                 50% 0;
-        }
-
-        .charm-message {
-            right: 105px;
-
-            width: 190px;
-
-            top: 115px;
         }
 
         .instructions {
@@ -528,21 +463,6 @@
     </button>
 
 
-    <div
-        class="charm-message"
-        id="charmMessage">
-
-        <strong>
-            A little piece of culture,
-            wherever you are.
-        </strong>
-
-        <span>
-            Indian.SG Digital Charm
-        </span>
-
-    </div>
-
 </div>
 
 
@@ -556,11 +476,6 @@
 const charm =
     document.getElementById(
         "indian-sg-charm"
-    );
-
-const message =
-    document.getElementById(
-        "charmMessage"
     );
 
 const closeButton =
@@ -699,10 +614,6 @@ charm.addEventListener(
             event.pointerId
         );
 
-        message.classList.remove(
-            "show"
-        );
-
     }
 );
 
@@ -830,21 +741,6 @@ function releaseCharm() {
     velocityX *= 1.25;
 
     velocityY *= 1.25;
-
-
-    message.classList.add(
-        "show"
-    );
-
-
-    setTimeout(
-        () => {
-            message.classList.remove(
-                "show"
-            );
-        },
-        3000
-    );
 }
 
 
@@ -997,10 +893,6 @@ closeButton.addEventListener(
 
         charm.style.opacity =
             "0";
-
-        message.classList.remove(
-            "show"
-        );
     }
 );
 
