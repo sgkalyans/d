@@ -49,8 +49,62 @@
   ></script>
 
   <style>
+    /*
+        The charm's rope is drawn in an SVG
+        sized wider than its own visible area
+        so the swinging cord can paint outside
+        its resting box (needed for the curved
+        rope physics). #indian-sg-charm is
+        position:absolute with no positioned
+        ancestor, so its containing block is
+        the root element, not body -- that
+        overflow was being counted as part of
+        the *html* element's own scrollable
+        width, which grew and shrank every
+        animation frame as the rope swung,
+        appearing as the whole page flickering
+        /shaking rather than just the charm.
+        The rope doesn't need horizontal
+        scroll to be visible, so clipping it
+        here is safe. Set on both html and
+        body: browsers use body's overflow
+        (not html's) to decide the viewport's
+        own scroll behaviour whenever body
+        sets one at all, so html-only left
+        the page still horizontally
+        scrollable by exactly the overflow
+        amount.
+    */
+    html {
+      overflow-x: hidden;
+    }
+
     body {
       font-family: Arial, sans-serif;
+      overflow-x: hidden;
+
+      /*
+          Also makes body (rather than the
+          true document root) the containing
+          block for #indian-sg-charm's
+          position:absolute -- overflow set
+          on the same element that IS the
+          containing block reliably clips it;
+          overflow set on an ancestor further
+          up did not.
+      */
+      position: relative;
+
+      /*
+          Without this, the browser's default
+          body margin (Tailwind's preflight
+          normally zeroes it, but don't rely
+          on that CDN script loading) would
+          now shift the charm's fixed 80px/
+          24px offsets, since body just became
+          its containing block above.
+      */
+      margin: 0;
     }
   </style>
 <style>
