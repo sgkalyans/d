@@ -95,29 +95,29 @@
         cursor: grabbing;
     }
 
-    /* Rope */
+    /* Rope
 
-    .charm-rope {
+       A real simulated cord (see the
+       ROPE PHYSICS section of the script)
+       instead of a straight rotating bar,
+       so it bends into a curve during a
+       swing instead of staying rigid.
+    */
+
+    .charm-rope-svg {
         position: absolute;
 
         top: 0;
         left: 50%;
 
-        width: 6px;
-        height: 82px;
+        width: 280px;
+        height: 220px;
 
         transform: translateX(-50%);
 
-        border-radius: 10px;
+        overflow: visible;
 
-        background:
-            repeating-linear-gradient(
-                135deg,
-                #9b6514 0px,
-                #9b6514 3px,
-                #e5b842 3px,
-                #e5b842 6px
-            );
+        pointer-events: none;
     }
 
     /* Pendant
@@ -139,6 +139,15 @@
 
         width: 100%;
         height: 100%;
+
+        /*
+            Pivots around where the rope's
+            last simulated point attaches
+            (82px down -- the rope's rest
+            length), not the pendant box's
+            own top edge.
+        */
+        transform-origin: 50% 82px;
     }
 
     /* Dangle
@@ -984,7 +993,34 @@
 
 <div id="indian-sg-charm">
 
-    <div class="charm-rope" id="charmRope"></div>
+    <svg
+        class="charm-rope-svg"
+        id="charmRopeSvg"
+        viewBox="-140 0 280 220"
+        width="280"
+        height="220"
+    >
+
+        <defs>
+            <linearGradient
+                id="charmRopeGradient"
+                x1="0" y1="0" x2="0" y2="1"
+            >
+                <stop offset="0%" stop-color="#e5b842" />
+                <stop offset="50%" stop-color="#9b6514" />
+                <stop offset="100%" stop-color="#e5b842" />
+            </linearGradient>
+        </defs>
+
+        <path
+            id="charmRopePath"
+            fill="none"
+            stroke="url(#charmRopeGradient)"
+            stroke-width="6"
+            stroke-linecap="round"
+        />
+
+    </svg>
 
     <div class="charm-pendant" id="charmPendant">
 
@@ -1032,9 +1068,9 @@ const charm =
         "indian-sg-charm"
     );
 
-const rope =
+const ropePath =
     document.getElementById(
-        "charmRope"
+        "charmRopePath"
     );
 
 const pendant =
@@ -1047,13 +1083,280 @@ const dangle =
         "charmDangle"
     );
 
-const ROPE_REST_HEIGHT = 82;
+
+/* =========================================
+   ROPE PHYSICS
+
+   A short Verlet-integrated chain instead
+   of one rigid rotating bar: gravity pulls
+   each point down, distance constraints
+   pull segments back toward their rest
+   length, and the whole chain is relaxed
+   several times a step so a pull at one
+   end reaches the other within the same
+   frame. This is a small version of the
+   technique behind Hangly's rope solver --
+   position-based constraints rather than
+   per-segment springs, so it settles
+   instead of resonating forever.
+   ========================================= */
+
+const ROPE_POINT_COUNT = 6;
+
+const ROPE_LAST_INDEX =
+    ROPE_POINT_COUNT - 1;
+
+const ROPE_SEGMENT_COUNT =
+    ROPE_POINT_COUNT - 1;
+
+const ROPE_REST_LENGTH = 82;
+
+const ROPE_SEGMENT_LENGTH =
+    ROPE_REST_LENGTH / ROPE_SEGMENT_COUNT;
+
+const ROPE_GRAVITY = 1800;
+
+const ROPE_DAMPING = 0.93;
+
+const ROPE_CONSTRAINT_ITERATIONS = 20;
+
+const ROPE_MAX_STRETCH_RATIO = 1.3;
+
+const ROPE_MAX_DRAG_SPEED = 60;
+
+const ROPE_MAX_REACH_X = 130;
+
+const ROPE_MAX_REACH_Y_UP = -30;
+
+const ROPE_MAX_REACH_Y_DOWN = 140;
+
+/*
+    Each point tracks its current position
+    (x, y) and previous position (px, py).
+    Verlet infers velocity from the gap
+    between them instead of a separate
+    velocity variable, so a constraint
+    correction automatically carries into
+    next step's motion.
+*/
+
+const ropePoints = [];
+
+for (let i = 0; i < ROPE_POINT_COUNT; i++) {
+
+    const y = i * ROPE_SEGMENT_LENGTH;
+
+    ropePoints.push({ x: 0, y: y, px: 0, py: y });
+}
+
+
+function integrateRopePoints() {
+
+    for (let i = 1; i < ROPE_POINT_COUNT; i++) {
+
+        if (dragging && i === ROPE_LAST_INDEX) {
+            continue;
+        }
+
+        const point = ropePoints[i];
+
+        const velocityX =
+            (point.x - point.px) * ROPE_DAMPING;
+
+        const velocityY =
+            (point.y - point.py) * ROPE_DAMPING;
+
+        const nextX = point.x + velocityX;
+
+        const nextY =
+            point.y + velocityY +
+            ROPE_GRAVITY * FIXED_TIMESTEP * FIXED_TIMESTEP;
+
+        point.px = point.x;
+        point.py = point.y;
+        point.x = nextX;
+        point.y = nextY;
+    }
+}
+
+
+function driveDraggedRopePoint() {
+
+    if (!dragging) {
+        return;
+    }
+
+    const point = ropePoints[ROPE_LAST_INDEX];
+
+    const dx = dragTargetX - point.x;
+    const dy = dragTargetY - point.y;
+
+    const distance = Math.hypot(dx, dy);
+
+    point.px = point.x;
+    point.py = point.y;
+
+    if (distance > 0.001) {
+
+        const step =
+            Math.min(distance, ROPE_MAX_DRAG_SPEED);
+
+        point.x += (dx / distance) * step;
+        point.y += (dy / distance) * step;
+    }
+}
+
+
+function relaxRopeConstraints() {
+
+    for (
+        let pass = 0;
+        pass < ROPE_CONSTRAINT_ITERATIONS;
+        pass++
+    ) {
+
+        for (let i = 0; i < ROPE_SEGMENT_COUNT; i++) {
+
+            const a = ropePoints[i];
+            const b = ropePoints[i + 1];
+
+            const dx = b.x - a.x;
+            const dy = b.y - a.y;
+
+            const distance =
+                Math.hypot(dx, dy) || 0.0001;
+
+            const diff =
+                (distance - ROPE_SEGMENT_LENGTH) / distance;
+
+            const aFixed = i === 0;
+
+            const bFixed =
+                dragging && i + 1 === ROPE_LAST_INDEX;
+
+            if (aFixed && bFixed) {
+                continue;
+            }
+
+            if (aFixed) {
+                b.x -= dx * diff;
+                b.y -= dy * diff;
+            } else if (bFixed) {
+                a.x += dx * diff;
+                a.y += dy * diff;
+            } else {
+                a.x += dx * diff * 0.5;
+                a.y += dy * diff * 0.5;
+                b.x -= dx * diff * 0.5;
+                b.y -= dy * diff * 0.5;
+            }
+        }
+    }
+}
+
+
+function clampRopeStretch() {
+
+    const maxLength =
+        ROPE_SEGMENT_LENGTH * ROPE_MAX_STRETCH_RATIO;
+
+    for (let i = 0; i < ROPE_SEGMENT_COUNT; i++) {
+
+        const a = ropePoints[i];
+        const b = ropePoints[i + 1];
+
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+
+        const distance =
+            Math.hypot(dx, dy) || 0.0001;
+
+        if (distance > maxLength) {
+
+            const scale = maxLength / distance;
+
+            b.x = a.x + dx * scale;
+            b.y = a.y + dy * scale;
+        }
+    }
+}
+
+
+/*
+    A rope mid-swing crosses through zero
+    velocity at every peak and trough, not
+    just at true rest -- checking speed for
+    a single step would sleep the loop at
+    the first such crossing, freezing the
+    rope mid-oscillation. Requiring the low
+    -speed condition to hold for many
+    consecutive fixed steps (not just one)
+    tells a real settle apart from a
+    momentary turning point, the same way
+    Hangly's own FramesBeforeSleep does.
+*/
+
+let stillStepCount = 0;
+
+const FRAMES_BEFORE_SLEEP = 20;
+
+function isChainStillThisStep() {
+
+    for (let i = 1; i < ROPE_POINT_COUNT; i++) {
+
+        const point = ropePoints[i];
+
+        const speed =
+            Math.hypot(
+                point.x - point.px,
+                point.y - point.py
+            );
+
+        if (speed > 0.02) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function stepRope() {
+
+    ropePoints[0].x = 0;
+    ropePoints[0].y = 0;
+    ropePoints[0].px = 0;
+    ropePoints[0].py = 0;
+
+    integrateRopePoints();
+    driveDraggedRopePoint();
+    relaxRopeConstraints();
+    clampRopeStretch();
+
+    if (dragging || !isChainStillThisStep()) {
+        stillStepCount = 0;
+    } else {
+        stillStepCount += 1;
+    }
+}
+
+
+/* =========================================
+   PHYSICS STATE
+   ========================================= */
+
+let dragging = false;
+
+let pointerStartX = 0;
+let pointerStartY = 0;
+
+let dragTargetX = 0;
+let dragTargetY = ROPE_REST_LENGTH;
 
 /*
     Secondary motion: the bell/tassel/tag
-    trail a beat behind the main swing
-    instead of moving as one rigid body
-    with the mask.
+    trail a beat behind the mask's own
+    angle instead of moving as one rigid
+    body with it.
 */
 
 let dangleRotation = 0;
@@ -1062,36 +1365,15 @@ const DANGLE_LAG = 0.18;
 
 
 /* =========================================
-   PHYSICS
-   ========================================= */
-
-let dragging = false;
-
-let pointerStartX = 0;
-let pointerStartY = 0;
-
-let currentX = 0;
-let currentY = 0;
-
-let velocityX = 0;
-let velocityY = 0;
-
-let lastX = 0;
-let lastY = 0;
-
-let lastTime = 0;
-
-
-/* =========================================
    FIXED TIMESTEP + SLEEP
 
-   The spring constants below are tuned
-   for a 60 fps step. Advancing physics in
+   The rope constants above are tuned for
+   a 60 fps step. Advancing physics in
    fixed slices (instead of once per
-   requestAnimationFrame) keeps the bounce
-   feeling identical on a 60 Hz and a
-   120 Hz+ display. The loop also stops
-   rescheduling itself once the charm is
+   requestAnimationFrame) keeps it feeling
+   identical on a 60 Hz and a 120 Hz+
+   display. The loop also stops
+   rescheduling itself once the rope is
    fully at rest, instead of running
    requestAnimationFrame forever for a
    charm that isn't moving.
@@ -1160,27 +1442,6 @@ mobileQuery.addEventListener(
 );
 
 
-/* Spring strength */
-
-const SPRING =
-    0.07;
-
-
-/* Damping */
-
-const DAMPING =
-    0.84;
-
-
-/* Maximum movement */
-
-const MAX_X =
-    200;
-
-const MAX_Y =
-    180;
-
-
 /* =========================================
    POINTER DOWN
    ========================================= */
@@ -1195,27 +1456,20 @@ charm.addEventListener(
             "dragging"
         );
 
+        const point =
+            ropePoints[ROPE_LAST_INDEX];
+
         pointerStartX =
-            event.clientX -
-            currentX;
+            event.clientX - point.x;
 
         pointerStartY =
-            event.clientY -
-            currentY;
-
-        lastX =
-            event.clientX;
-
-        lastY =
-            event.clientY;
-
-        lastTime =
-            performance.now();
+            event.clientY - point.y;
 
         charm.setPointerCapture(
             event.pointerId
         );
 
+        wakePhysics();
     }
 );
 
@@ -1232,77 +1486,32 @@ charm.addEventListener(
             return;
         }
 
-        const now =
-            performance.now();
+        let newTargetX =
+            event.clientX - pointerStartX;
 
-        const deltaTime =
+        let newTargetY =
+            event.clientY - pointerStartY;
+
+
+        /* Limit how far the user can pull */
+
+        newTargetX =
             Math.max(
-                1,
-                now - lastTime
+                -ROPE_MAX_REACH_X,
+                Math.min(ROPE_MAX_REACH_X, newTargetX)
             );
 
-
-        let newX =
-            event.clientX -
-            pointerStartX;
-
-        let newY =
-            event.clientY -
-            pointerStartY;
-
-
-        /* Limit how far user can pull */
-
-        newX =
+        newTargetY =
             Math.max(
-                -MAX_X,
+                ROPE_REST_LENGTH + ROPE_MAX_REACH_Y_UP,
                 Math.min(
-                    MAX_X,
-                    newX
+                    ROPE_REST_LENGTH + ROPE_MAX_REACH_Y_DOWN,
+                    newTargetY
                 )
             );
 
-
-        newY =
-            Math.max(
-                -50,
-                Math.min(
-                    MAX_Y,
-                    newY
-                )
-            );
-
-
-        velocityX =
-            (event.clientX -
-                lastX) /
-            deltaTime *
-            16;
-
-        velocityY =
-            (event.clientY -
-                lastY) /
-            deltaTime *
-            16;
-
-
-        currentX =
-            newX;
-
-        currentY =
-            newY;
-
-
-        lastX =
-            event.clientX;
-
-        lastY =
-            event.clientY;
-
-        lastTime =
-            now;
-
-        updateCharm();
+        dragTargetX = newTargetX;
+        dragTargetY = newTargetY;
     }
 );
 
@@ -1334,16 +1543,6 @@ function releaseCharm() {
         "dragging"
     );
 
-
-    /*
-        Add extra spring energy
-        when released.
-    */
-
-    velocityX *= 1.25;
-
-    velocityY *= 1.25;
-
     wakePhysics();
 }
 
@@ -1352,79 +1551,7 @@ function releaseCharm() {
    PHYSICS LOOP
    ========================================= */
 
-function stepPhysics() {
-
-    /*
-        Spring pulls the charm
-        back toward its original
-        position.
-    */
-
-    velocityX +=
-        -currentX *
-        SPRING;
-
-    velocityY +=
-        -currentY *
-        SPRING;
-
-
-    /*
-        Damping makes the movement
-        gradually settle.
-    */
-
-    velocityX *=
-        DAMPING;
-
-    velocityY *=
-        DAMPING;
-
-
-    currentX +=
-        velocityX;
-
-    currentY +=
-        velocityY;
-
-
-    /*
-        Stop tiny movements.
-    */
-
-    if (
-        Math.abs(currentX) < 0.05 &&
-        Math.abs(velocityX) < 0.05
-    ) {
-
-        currentX = 0;
-        velocityX = 0;
-    }
-
-
-    if (
-        Math.abs(currentY) < 0.05 &&
-        Math.abs(velocityY) < 0.05
-    ) {
-
-        currentY = 0;
-        velocityY = 0;
-    }
-}
-
 function physics(now) {
-
-    if (dragging) {
-
-        /*
-            pointermove already renders the
-            drag directly -- nothing for this
-            loop to do until it's released.
-        */
-
-        physicsLoopRunning = false;
-        return;
-    }
 
     const frameDelta =
         Math.min(
@@ -1434,35 +1561,22 @@ function physics(now) {
 
     lastPhysicsTime = now;
 
-    physicsAccumulator +=
-        frameDelta;
+    physicsAccumulator += frameDelta;
 
-    while (
-        physicsAccumulator >=
-        FIXED_TIMESTEP
-    ) {
+    while (physicsAccumulator >= FIXED_TIMESTEP) {
 
-        stepPhysics();
+        stepRope();
 
-        physicsAccumulator -=
-            FIXED_TIMESTEP;
+        physicsAccumulator -= FIXED_TIMESTEP;
     }
 
     updateCharm();
 
-
-    const settled =
-        currentX === 0 &&
-        currentY === 0 &&
-        velocityX === 0 &&
-        velocityY === 0;
-
-    if (settled) {
+    if (!dragging && stillStepCount >= FRAMES_BEFORE_SLEEP) {
 
         physicsLoopRunning = false;
         return;
     }
-
 
     requestAnimationFrame(
         physics
@@ -1474,86 +1588,113 @@ function physics(now) {
    VISUAL POSITION
    ========================================= */
 
+function buildRopePath() {
+
+    let d = `M ${ropePoints[0].x} ${ropePoints[0].y}`;
+
+    for (let i = 1; i < ROPE_LAST_INDEX; i++) {
+
+        const current = ropePoints[i];
+        const next = ropePoints[i + 1];
+
+        const midX = (current.x + next.x) / 2;
+        const midY = (current.y + next.y) / 2;
+
+        d += ` Q ${current.x} ${current.y} ${midX} ${midY}`;
+    }
+
+    const secondLast = ropePoints[ROPE_LAST_INDEX - 1];
+    const last = ropePoints[ROPE_LAST_INDEX];
+
+    d += ` Q ${secondLast.x} ${secondLast.y} ${last.x} ${last.y}`;
+
+    return d;
+}
+
 function updateCharm() {
 
-    /*
-        Horizontal movement produces
-        rotation like a hanging object.
-
-        Negated because CSS rotate() is
-        clockwise-positive: swinging the
-        bottom of something hanging from
-        a fixed top point *left* is a
-        counter-clockwise (negative)
-        rotation, the opposite sign of
-        the pointer's own movement.
-    */
-
-    const rotation =
-        -currentX *
-        0.13;
+    ropePath.setAttribute(
+        "d",
+        buildRopePath()
+    );
 
 
     /*
-        Pulling down stretches the rope
-        itself -- like elastic -- while
-        the pendant (tag/bell/tassel)
-        keeps its own shape and just
-        hangs lower by the same amount.
+        The pendant hangs from the rope's
+        last simulated point and orients
+        along that final segment, instead
+        of rotating as an abstract rigid
+        body -- see the comment on
+        .charm-pendant's transform-origin
+        for why translate/rotate combine
+        the way they do here.
     */
 
-    const stretch =
-        Math.min(
-            Math.max(currentY, 0),
-            60
-        );
+    const last = ropePoints[ROPE_LAST_INDEX];
+    const secondLast = ropePoints[ROPE_LAST_INDEX - 1];
 
-    rope.style.height =
-        `${ROPE_REST_HEIGHT + stretch}px`;
+    const segmentDx = last.x - secondLast.x;
+    const segmentDy = last.y - secondLast.y;
+
+    const pendantAngle =
+        Math.atan2(-segmentDx, segmentDy) *
+        (180 / Math.PI);
 
     pendant.style.transform =
-        `translateY(${stretch}px)`;
+        `translate(${last.x}px, ${last.y - ROPE_REST_LENGTH}px) rotate(${pendantAngle}deg)`;
 
 
     /*
         The dangle (bell/tassel/tag) eases
-        toward the main rotation instead of
-        snapping to it, so it trails a beat
-        behind -- secondary motion, like a
-        loose hinge rather than one solid
-        piece.
+        toward the pendant's own angle
+        instead of snapping to it, so it
+        trails a beat behind -- secondary
+        motion, like a loose hinge rather
+        than one solid piece.
     */
 
     dangleRotation +=
-        (rotation - dangleRotation) *
+        (pendantAngle - dangleRotation) *
         DANGLE_LAG;
 
     dangle.style.transform =
-        `rotate(${dangleRotation - rotation}deg)`;
+        `rotate(${dangleRotation - pendantAngle}deg)`;
 
 
     charm.style.transform =
-        `
-        rotate(
-            ${rotation}deg
-        )
-        scale(
-            ${baseScale}
-        )
-        `;
+        `scale(${baseScale})`;
 }
 
 
 /* Start physics */
 
 /*
-    A small starting offset so the charm
-    visibly swings into place on load
+    Seed the whole chain at a small angle
+    (not just the last point) so it swings
+    into its resting position on load
     instead of sitting static until
-    touched.
+    touched. Displacing every point keeps
+    the initial pose geometrically valid,
+    so the constraint solver doesn't have
+    to fight a huge violation on frame one.
 */
 
-currentX = -70;
+(function seedInitialSwing() {
+
+    const angle = (22 * Math.PI) / 180;
+
+    for (let i = 1; i < ROPE_POINT_COUNT; i++) {
+
+        const length = i * ROPE_SEGMENT_LENGTH;
+        const x = length * Math.sin(angle);
+        const y = length * Math.cos(angle);
+
+        ropePoints[i].x = x;
+        ropePoints[i].y = y;
+        ropePoints[i].px = x;
+        ropePoints[i].py = y;
+    }
+})();
 
 updateCharm();
 
