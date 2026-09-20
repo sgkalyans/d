@@ -165,7 +165,7 @@
     .bommai {
         position: absolute;
 
-        top: 103px;
+        top: 96px;
         left: 50%;
 
         width: 135px;
@@ -174,6 +174,8 @@
         transform: translateX(-50%);
 
         object-fit: contain;
+
+        border-radius: 22%;
 
         pointer-events: none;
 
@@ -398,14 +400,15 @@
             display: none;
         }
 
+        .hero {
+            padding-right: 165px;
+        }
+
         #indian-sg-charm {
             right: 7px;
 
             transform-origin:
                 50% 0;
-
-            transform:
-                scale(.78);
         }
 
         .charm-message {
@@ -471,28 +474,11 @@
     <div class="charm-bead black-bead"></div>
 
 
-    <!--
-        Placeholder artwork.
-        Swap for the real Drishti
-        Bommai PNG when available
-        (e.g. <img class="bommai"
-        src="indian-sg-drishti-bommai.png"
-        alt="Indian.SG Digital Charm">).
-    -->
-
-    <svg
+    <img
         class="bommai"
-        viewBox="0 0 135 135"
-        role="img"
-        aria-label="Indian.SG Digital Charm"
+        src="indian-sg-drishti-bommai.png"
+        alt="Indian.SG Digital Charm"
     >
-        <circle cx="67.5" cy="67.5" r="62" fill="#e5b842"/>
-        <circle cx="67.5" cy="67.5" r="52" fill="#e9652d"/>
-        <path d="M 20 67.5 Q 67.5 30 115 67.5 Q 67.5 105 20 67.5 Z" fill="#fffdf8"/>
-        <circle cx="67.5" cy="67.5" r="18" fill="#102d55"/>
-        <circle cx="67.5" cy="67.5" r="9" fill="#0a0a0a"/>
-        <circle cx="62" cy="61" r="4" fill="#ffffff" opacity="0.85"/>
-    </svg>
 
 
     <div
@@ -577,6 +563,40 @@ let lastX = 0;
 let lastY = 0;
 
 let lastTime = 0;
+
+
+/* =========================================
+   RESPONSIVE SCALE
+
+   Applied inside updateCharm() so it
+   survives the inline transform written
+   on every physics frame (a plain CSS
+   "transform: scale()" on #indian-sg-charm
+   would otherwise get overwritten).
+   ========================================= */
+
+const mobileQuery =
+    window.matchMedia(
+        "(max-width: 600px)"
+    );
+
+let baseScale =
+    mobileQuery.matches ?
+        0.78 :
+        1;
+
+mobileQuery.addEventListener(
+    "change",
+    function(event) {
+
+        baseScale =
+            event.matches ?
+                0.78 :
+                1;
+
+        updateCharm();
+    }
+);
 
 
 /* Spring strength */
@@ -891,22 +911,21 @@ function updateCharm() {
     const scaleY =
         1 +
         Math.min(
-            Math.abs(currentY) / 900,
-            0.12
+            Math.abs(currentY) / 500,
+            0.35
         );
 
 
     charm.style.transform =
         `
-        translate(
-            ${currentX}px,
-            ${currentY}px
-        )
         rotate(
             ${rotation}deg
         )
         scaleY(
             ${scaleY}
+        )
+        scale(
+            ${baseScale}
         )
         `;
 }
@@ -924,7 +943,7 @@ closeButton.addEventListener(
             "transform .5s ease, opacity .5s ease";
 
         charm.style.transform =
-            "translateY(-360px) rotate(-10deg)";
+            `translateY(-360px) rotate(-10deg) scale(${baseScale})`;
 
         charm.style.opacity =
             "0";
