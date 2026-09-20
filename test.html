@@ -1118,9 +1118,26 @@ const ROPE_GRAVITY = 1800;
 
 const ROPE_DAMPING = 0.93;
 
-const ROPE_CONSTRAINT_ITERATIONS = 20;
+/*
+    Iteration count doubles as a stiffness
+    dial for position-based dynamics like
+    this: with fewer passes, tension from a
+    drag doesn't fully resolve within a
+    step, so it distributes as elastic give
+    across every segment instead of being
+    held taut everywhere except the one
+    link nearest the cursor. It barely
+    affects the passive swing (gravity's
+    pull each step is tiny and corrects
+    easily either way) -- simulated both
+    before picking this, settle time and
+    bounce count were the same from 4 to 20
+    passes.
+*/
 
-const ROPE_MAX_STRETCH_RATIO = 1.3;
+const ROPE_CONSTRAINT_ITERATIONS = 5;
+
+const ROPE_MAX_STRETCH_RATIO = 1.8;
 
 const ROPE_MAX_DRAG_SPEED = 60;
 
