@@ -64,7 +64,13 @@
        ========================================== */
 
     #indian-sg-charm {
-        position: fixed;
+        /*
+            Absolute (not fixed) so it scrolls
+            away with the rest of the page
+            instead of floating over content
+            for the whole scroll.
+        */
+        position: absolute;
         top: 80px;
         right: 24px;
 
